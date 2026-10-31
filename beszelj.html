@@ -247,7 +247,7 @@ textarea{min-height:96px;resize:vertical}
 <div id="app"></div>
 <script>
 var __BOOT=(function(){
-  var OWN="2.20";
+  var OWN="2.21";
   window.__APP_VERSION=OWN;
   function cmp(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1;}return 0;}
   function verOf(h){var m=/var OWN="([0-9.]+)"/.exec(h||"");return m?m[1]:null;}
@@ -798,7 +798,7 @@ const SCHEMA={
  translate:`"translate":[{"hu":"short everyday Hungarian sentence","en":"natural ${TL()} translation"}] (exactly 3)`,
  cloze:`"cloze":[{"sentence":"${TL()} sentence where ONE of today's words is replaced by ___","answer":"the missing word or phrase exactly","hu":"Hungarian translation of the full sentence"}] (exactly 3)`,
  story:`"story":{"en":"a lively 4-5 sentence spoken mini-story on the theme","hu":"its Hungarian translation","statements":[{"hu":"Hungarian statement about a detail of the story","true":true}]} (exactly 4 statements, mix true and false)`,
- dialogue:`"dialogue":{"title_hu":"short Hungarian title","lines":[{"who":"A or B","en":"line","hu":"Hungarian translation"}]} (5-6 lines in the correct order, each line clearly follows the previous one)`,
+ dialogue:`"dialogue":{"title_hu":"short Hungarian title","lines":[{"who":"A or B","en":"line","hu":"Hungarian translation"}]} (6 lines in the correct order). It must be ONE connected conversation, not separate question-answer pairs: line 1 is a greeting or opening, the last line is a thank-you or goodbye, and every line refers back to the previous one (with words like "it", "then", "that one", "so"), so that only one order makes sense.`,
  oddone:`"oddone":[{"words":["four ${TL()} words, three of which belong together"],"odd":"the odd one (exactly as in words)","why_hu":"short Hungarian reason"}] (exactly 3)`,
  react:`"react":[{"situation_hu":"short everyday situation in Hungarian (what happens / what you want)","options":["MOST natural ${TL()} reply","grammatical but unnatural or impolite reply","wrong reply","wrong reply"],"why_hu":"short Hungarian explanation"}] (exactly 3)`,
  tongue:`"tongue":[{"en":"short ${TL()} tongue twister practising a sound hard for Hungarians","hu":"Hungarian meaning","sound":"the sound or sound pair being practised"}] (exactly 2)`,
@@ -1239,8 +1239,14 @@ function stepDialogue(){
   app.innerHTML=sessHead()+`<h2>Párbeszéd-rendező</h2><p class="muted">${esc(d.title_hu||"")} · Koppints a mondatokra a helyes sorrendben.</p>
   <div class="dlg">${s.ans.map((k,n)=>`<button class="dline placed" data-act="dlrm" data-n="${n}" ${s.checked?"disabled":""}><span class="who">${n%2?"B":"A"}</span>${esc(lines[k].en)}</button>`).join("")||`<p class="muted center">Az első mondattal kezdd…</p>`}</div>
   <div class="dlg pool2">${d.order.filter(k=>!s.ans.includes(k)).map(k=>`<button class="dline" data-act="dladd" data-k="${k}">${esc(lines[k].en)}</button>`).join("")}</div>
-  <div id="fb">${s.checked?(()=>{const ok=s.ans.every((k,i)=>k===i);return `<div class="feedback ${ok?"ok":"bad"}">${ok?"Tökéletes sorrend! 🎉":"A helyes sorrend:"}</div><div class="panel">${lines.map(l=>`<p><button class="mini" data-act="say" data-t="${esc(l.en)}">🔊</button> <b>${esc(l.who||"")}${l.who?":":""}</b> ${esc(l.en)}${l.hu?`<br><span class="muted exhu">${esc(l.hu)}</span>`:""}</p>`).join("")}</div>`;})():""}</div>
+  <div id="fb">${s.checked?(()=>{const r=dlgOk(s.ans,lines),ok=r>0;return `<div class="feedback ${ok?"ok":"bad"}">${r===2?"Tökéletes sorrend! 🎉":r===1?"Ez a sorrend is értelmes! 👍 Az eredeti így szólt:":"A helyes sorrend:"}</div><div class="panel">${lines.map(l=>`<p><button class="mini" data-act="say" data-t="${esc(l.en)}">🔊</button> <b>${esc(l.who||"")}${l.who?":":""}</b> ${esc(l.en)}${l.hu?`<br><span class="muted exhu">${esc(l.hu)}</span>`:""}</p>`).join("")}</div>`;})():""}</div>
   <div class="foot">${s.checked?`<button class="btn big" data-act="next-step">Tovább</button>`:`<button class="btn big" data-act="dlcheck" ${s.ans.length===lines.length?"":"disabled"}>Ellenőrzés</button>`}</div>`;
+}
+function dlgOk(ans,lines){
+  if(ans.every((k,i)=>k===i))return 2;
+  const n=lines.length;if(n%2)return 0;
+  for(let i=0;i<n;i+=2){if(ans[i]%2!==0||ans[i+1]!==ans[i]+1)return 0;}
+  return 1;
 }
 /* odd one out */
 function stepOdd(){
@@ -2033,7 +2039,7 @@ document.addEventListener("click",e=>{
     case "storynext":SS.sub.answered=false;SS.sub.i++;vSession();saveSession();break;
     case "dladd":{const s=SS.sub;if(!s.checked){s.ans.push(+b.dataset.k);speak(SS.L.dialogue.lines[+b.dataset.k].en,1.05);vSession();}break;}
     case "dlrm":{const s=SS.sub;if(!s.checked){s.ans.splice(+b.dataset.n,1);vSession();}break;}
-    case "dlcheck":{const s=SS.sub;s.checked=true;const ok=s.ans.every((k,i)=>k===i);if(ok)SS.xp+=15;else note("🗨️ Párbeszéd-rendező","",SS.L.dialogue.lines.map(l=>l.en).join(" → "),"A helyes sorrend.");vSession();break;}
+    case "dlcheck":{const s=SS.sub;s.checked=true;const ok=dlgOk(s.ans,SS.L.dialogue.lines.slice(0,SS.L.dialogue.order.length))>0;if(ok)SS.xp+=15;else note("🗨️ Párbeszéd-rendező","",SS.L.dialogue.lines.map(l=>l.en).join(" → "),"A helyes sorrend.");vSession();break;}
     case "oans":oddAnswer(+b.dataset.i,b);break;
     case "rans":reactAnswer(+b.dataset.i,b);break;
     case "qcheck":questionCheck();break;
@@ -2082,6 +2088,7 @@ ruSet("beszelj-remote-ok",APP_VERSION);
 /* what's new */
 const CHANGELOG={
  "2.15":["Frissítés után az app megmutatja, mi változott (ezt látod most 🙂)","Az első távoli frissítés sikeresen megérkezett a GitHubról 🎉"],
+ "2.21":["Párbeszéd-rendező: az AI egyetlen összefüggő beszélgetést ír, és ha a kérdés-válasz párokat másik értelmes sorrendbe rakod, az is helyesnek számít"],
  "2.20":["iPhone/web: a felolvasás már nem használ effekthangokat (például recsegő „nagypapa” hangot), hanem a legjobb elérhető hangot","A ⚙️ Beállításokban magad is választhatsz felolvasó hangot (webes verzió)"],
  "2.19":["🌍 Új nyelvek: német, spanyol, olasz és francia. A főoldal bal felső sarkában a zászlóra koppintva válthatsz","Minden nyelvnek teljesen külön profilja van, az angol haladásod érintetlen marad","Minden nyelvhez saját beszélgetőtárs tartozik: Lena (német), Lucía (spanyol), Giulia (olasz), Camille (francia)","Új, zászlós ikon"],
  "2.18":["Villám-sprint: egy körön belül minden szó csak egyszer jön, amíg az összes el nem fogy; a gyengébb szavak kerülnek előre"],
