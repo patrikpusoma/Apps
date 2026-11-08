@@ -155,8 +155,8 @@ a{color:var(--rim)}
 <div id="modal" style="display:none"></div>
 <script>
 "use strict";
-var APP_VER = "1.8.1";
-var DEFAULT_UPD = "https://raw.githubusercontent.com/patrikpusoma/beszelj/main/fozzunk.html";
+var APP_VER = "1.8.2";
+var DEFAULT_UPD = "https://raw.githubusercontent.com/patrikpusoma/Apps/main/fozzunk.html";
 var NATIVE = typeof window.AndroidBridge !== "undefined";
 var LS = "fozzunk-v1";
 var API = "https://api.openai.com/v1/chat/completions";
@@ -166,6 +166,7 @@ function defState(){return {setup:false,openaiKey:"",pexelsKey:"",household:2,pe
  log:[],recipes:{},pantry:[],shop:[],plan:null,sugg:null,fsugg:null,img:{},own:{},mode:"any"};}
 var S = (function(){try{var o=JSON.parse(localStorage.getItem(LS)||"null");if(o)return Object.assign(defState(),o);}catch(e){}return defState();})();
 Object.keys(S.img).forEach(function(k){if(!S.img[k].px)delete S.img[k];});
+if(S.updUrl&&/\/patrikpusoma\/beszelj\//i.test(S.updUrl))S.updUrl=S.updUrl.replace(/\/patrikpusoma\/beszelj\//i,"/patrikpusoma/Apps/");
 if(!S.folders) S.folders=[["edes","🥞","Édes reggeli"],["sos","🍳","Sós reggeli"],["leves","🍲","Levesek"],["fo","🍖","Főételek"],["teszta","🍝","Tészták"],["salata","🥗","Saláták, könnyű ételek"],["suti","🍰","Sütik, desszertek"]].map(function(a){return {id:a[0],e:a[1],n:a[2]};});
 function folderById(id){for(var i=0;i<S.folders.length;i++)if(S.folders[i].id===id)return S.folders[i];return null;}
 function folderByName(n){var x=norm(n);if(!x)return null;for(var i=0;i<S.folders.length;i++){var f=norm(S.folders[i].n);if(f===x||f.indexOf(x)>=0||x.indexOf(f)>=0)return S.folders[i];}return null;}
