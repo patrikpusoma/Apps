@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Főzzünk!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F7F6;--card:#FFFFFF;--rim:#1D4E89;--rim2:#DCE6F2;--ink:#18222D;--mute:#5A6672;--pap:#C42A26;--pea:#4A7A26;--line:#E1E6EA;--onrim:#FFFFFF;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0F1821;--card:#16222F;--rim:#6E9DDA;--rim2:#21354B;--ink:#E7EDF3;--mute:#9BA9B6;--pap:#FF7A6B;--pea:#93C46A;--line:#27384B;--onrim:#0F1821;color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3,.brand{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.15;margin:0}
+h1{font-size:28px;font-weight:800}h2{font-size:21px;font-weight:700}h3{font-size:17px;font-weight:700}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:11px 13px;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--rim)}
+button:focus-visible{outline:3px solid var(--rim);outline-offset:2px}
+#app{min-height:100%}
+.top{position:sticky;top:0;z-index:5;background:var(--rim);color:var(--onrim);padding:14px 18px 16px;
+ background-image:radial-gradient(rgba(255,255,255,.13) 1px,transparent 1.6px),radial-gradient(rgba(0,0,0,.08) 1px,transparent 1.6px);background-size:11px 11px,17px 17px;background-position:0 0,5px 7px;
+ border-radius:0 0 26px 26px;display:flex;align-items:center;gap:10px}
+.top .brand{font-size:24px;font-weight:800;flex:1}
+.iconbtn{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:rgba(255,255,255,.16)}
+main{padding:18px 16px 110px;max-width:640px;margin:0 auto}
+.sec{margin:0 0 26px}
+.sec>h2{margin-bottom:10px}
+.hint{color:var(--mute);font-size:14px;margin:4px 0 10px}
+.row{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:999px;background:var(--rim);color:var(--onrim);font-weight:700}
+.btn.ghost{background:var(--rim2);color:var(--ink)}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.45}
+.btn.sm{min-height:38px;padding:0 14px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border-radius:999px;border:2px solid var(--line);background:var(--card);font-size:14px;font-weight:600}
+.chip.on{border-color:var(--rim);background:var(--rim);color:var(--onrim)}
+.dish{display:block;width:100%;text-align:left;background:var(--card);border:3px solid var(--rim);border-radius:24px;overflow:hidden;margin:0 0 14px}
+.ph{aspect-ratio:16/9;background:var(--rim2);display:grid;place-items:center;font-size:42px;overflow:hidden;position:relative}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.dish .body{padding:12px 15px 14px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--mute);margin-top:4px}
+.kcal{color:var(--pap);font-weight:700}
+.why{font-size:14px;margin-top:6px}
+.tags{font-size:13px;margin-top:6px;color:var(--mute)}
+.tags b{color:var(--pea)}.tags i{font-style:normal;color:var(--pap)}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:15px}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list .grow{flex:1;min-width:0}
+.x{width:34px;height:34px;border-radius:50%;color:var(--mute);font-size:18px}
+.tag{font-size:12px;font-weight:700;color:var(--pap);border:1.5px solid currentColor;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chk{width:26px;height:26px;border-radius:8px;border:2.5px solid var(--rim);display:grid;place-items:center;flex:none;font-weight:800;color:var(--onrim)}
+.chk.on{background:var(--rim)}
+.done .grow{text-decoration:line-through;color:var(--mute)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:2px solid var(--line);display:flex;padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:var(--mute);padding:6px 0;border-radius:16px}
+.nav button span{font-size:21px;line-height:1.1}
+.nav button.on{color:var(--rim);background:var(--rim2)}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.thumb{position:relative;flex:none;width:92px;height:92px;border-radius:16px;overflow:hidden;border:2px solid var(--rim)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb button{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:14px}
+.loading{display:flex;align-items:center;gap:12px;color:var(--mute);padding:18px 4px}
+.pot{width:28px;height:28px;border-radius:50%;border:4px solid var(--rim2);border-top-color:var(--rim);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.pot{animation:none}}
+.toast{position:fixed;left:16px;right:16px;bottom:96px;z-index:50;background:var(--ink);color:var(--bg);padding:13px 16px;border-radius:16px;font-size:15px;box-shadow:0 6px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+/* recipe */
+.rtop{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;padding:12px 14px;background:linear-gradient(var(--bg),transparent)}
+.rtop .iconbtn{background:var(--card);border:2px solid var(--line);color:var(--ink)}
+.hero{margin:0 16px;border:3px solid var(--rim);border-radius:26px;overflow:hidden}
+.credit{font-size:12px;color:var(--mute);padding:6px 20px 0}
+.credit a{color:inherit}
+.rhead{padding:14px 18px 0}
+.macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 4px}
+.macros div{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:8px 6px;text-align:center;font-size:12px;color:var(--mute)}
+.macros b{display:block;font-size:18px;color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif}
+.macros div:first-child b{color:var(--pap)}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:40px;height:40px;border-radius:50%;background:var(--rim2);font-size:22px;font-weight:700}
+.stepper b{min-width:60px;text-align:center}
+.ing .q{font-weight:700;white-space:nowrap}
+.have{color:var(--pea);font-weight:800}
+ol.steps{padding-left:22px;margin:0}
+ol.steps li{margin:0 0 10px;padding-left:4px}
+.dog{border-color:var(--pea)}
+.dog h3{color:var(--pea)}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;gap:8px;padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:2px solid var(--line)}
+.foot .btn{flex:1}
+/* cook */
+.cook{min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+.cook .bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--rim);color:var(--onrim)}
+.cook .stage{flex:1;padding:22px 20px;display:flex;flex-direction:column;gap:18px}
+.progress{display:flex;gap:4px}
+.progress i{flex:1;height:6px;border-radius:3px;background:var(--rim2)}
+.progress i.on{background:var(--rim)}
+.steptext{font-size:25px;line-height:1.4;font-weight:500}
+.timer{border:3px solid var(--rim);border-radius:24px;padding:16px;text-align:center;background:var(--card)}
+.timer .t{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:52px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.timer.end .t{color:var(--pap)}
+.cook .ctrl{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.cook .ctrl .btn{min-height:58px}
+.speak{width:58px;height:58px;border-radius:50%;background:var(--rim2);font-size:24px}
+.rate{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.rate .opts{display:flex;gap:6px}
+.rate .opts button{width:48px;height:48px;border-radius:50%;font-size:24px;background:var(--rim2);opacity:.55}
+.rate .opts button.on{opacity:1;outline:3px solid var(--rim)}
+/* camera */
+.cam{position:fixed;inset:0;background:#000;z-index:40;display:flex;flex-direction:column}
+.cam video{flex:1;width:100%;object-fit:cover;min-height:0}
+.cam .cbar{display:flex;align-items:center;justify-content:space-around;padding:18px 0 calc(22px + env(safe-area-inset-bottom,0px))}
+.shutter{width:76px;height:76px;border-radius:50%;background:#fff;border:6px solid rgba(255,255,255,.4);background-clip:padding-box}
+.cam .cbar .iconbtn{color:#fff}
+.field{margin:0 0 14px}
+.field label{display:block;font-weight:700;margin-bottom:6px}
+.check{display:flex;gap:10px;align-items:center;font-weight:600}
+.check input{width:22px;height:22px}
+.empty{text-align:center;color:var(--mute);padding:22px 10px}
+.empty b{display:block;font-size:36px;margin-bottom:6px}
+.log .d{font-size:13px;color:var(--mute);min-width:64px}
+.small{font-size:13px;color:var(--mute)}
+a{color:var(--rim)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:12px 14px;min-height:96px}
+.tile .te{font-size:28px;line-height:1.2}
+.tile b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:16px;line-height:1.2}
+.tile.add{border-style:dashed;color:var(--mute)}
+.mback{position:fixed;inset:0;z-index:60;background:rgba(10,18,26,.55);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.mbox{width:100%;max-width:480px;background:var(--card);color:var(--ink);border:3px solid var(--rim);border-radius:26px;padding:20px 18px 16px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.mbox h3{font-size:20px;margin-bottom:6px}.mbox p{margin:0 0 12px;color:var(--mute)}
+.mbox input{margin:4px 0 14px}
+.mbtns{display:flex;gap:10px}.mbtns .btn{flex:1}
+.btn.danger{background:var(--pap);color:#fff}
+.framegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.frame{padding:0;border:3px solid transparent;border-radius:14px;overflow:hidden;aspect-ratio:9/16;background:var(--rim2)}
+.frame img{width:100%;height:100%;object-fit:cover;display:block}
+.frame.on{border-color:var(--rim)}
+.cropvp{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border:3px solid var(--rim);border-radius:24px;background:#1b2733;touch-action:none;user-select:none;-webkit-user-select:none}
+.cropvp .cbg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(18px) brightness(.85)}
+.cropvp .cimg{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;pointer-events:none}
+.cropvp .cgrid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,transparent 33.2%,rgba(255,255,255,.35) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.35) 66.6%,transparent 66.8%),linear-gradient(to bottom,transparent 33.2%,rgba(255,255,255,.35) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.35) 66.6%,transparent 66.8%)}
+.setup{padding:0 18px 40px;max-width:640px;margin:0 auto}
+.setup .hero2{background:var(--rim);color:var(--onrim);margin:0 -18px 22px;padding:40px 22px 30px;border-radius:0 0 32px 32px;
+ background-image:radial-gradient(rgba(255,255,255,.13) 1px,transparent 1.6px),radial-gradient(rgba(0,0,0,.08) 1px,transparent 1.6px);background-size:11px 11px,17px 17px;background-position:0 0,5px 7px}
+.setup .hero2 h1{font-size:40px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<div id="modal" style="display:none"></div>
+<script>
+"use strict";
+var APP_VER = "1.8.1";
+var DEFAULT_UPD = "https://raw.githubusercontent.com/patrikpusoma/beszelj/main/fozzunk.html";
+var NATIVE = typeof window.AndroidBridge !== "undefined";
+var LS = "fozzunk-v1";
+var API = "https://api.openai.com/v1/chat/completions";
+var DAYS = ["vasárnap","hétfő","kedd","szerda","csütörtök","péntek","szombat"];
+
+function defState(){return {setup:false,openaiKey:"",pexelsKey:"",household:2,people:"",avoid:"",dogs:true,readAloud:true,
+ log:[],recipes:{},pantry:[],shop:[],plan:null,sugg:null,fsugg:null,img:{},own:{},mode:"any"};}
+var S = (function(){try{var o=JSON.parse(localStorage.getItem(LS)||"null");if(o)return Object.assign(defState(),o);}catch(e){}return defState();})();
+Object.keys(S.img).forEach(function(k){if(!S.img[k].px)delete S.img[k];});
+if(!S.folders) S.folders=[["edes","🥞","Édes reggeli"],["sos","🍳","Sós reggeli"],["leves","🍲","Levesek"],["fo","🍖","Főételek"],["teszta","🍝","Tészták"],["salata","🥗","Saláták, könnyű ételek"],["suti","🍰","Sütik, desszertek"]].map(function(a){return {id:a[0],e:a[1],n:a[2]};});
+function folderById(id){for(var i=0;i<S.folders.length;i++)if(S.folders[i].id===id)return S.folders[i];return null;}
+function folderByName(n){var x=norm(n);if(!x)return null;for(var i=0;i<S.folders.length;i++){var f=norm(S.folders[i].n);if(f===x||f.indexOf(x)>=0||x.indexOf(f)>=0)return S.folders[i];}return null;}
+function folderNames(){return S.folders.map(function(f){return f.n;}).join("|");}
+function recFolders(r){return (r.folders||[]).filter(function(id){return folderById(id);});}
+function setFolderFromAI(r,name,prev){if(prev&&prev.length){r.folders=prev;return;}var f=folderByName(name);r.folders=f?[f.id]:[];}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){toast("Nem sikerült menteni: megtelt a tárhely. Törölj régi recepteket.");}}
+
+var tab="home", stack=[], busy={}, fridgePhotos=[], app=document.getElementById("app");
+function $(s){return document.querySelector(s);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function uid(){return Math.random().toString(36).slice(2,10);}
+function dstr(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();}
+function keyOf(name){return norm(name).replace(/[^a-z0-9]+/g,"-");}
+function people(){return S.people.split(/[,;\n]/).map(function(x){return x.trim();}).filter(Boolean);}
+
+var dialogClose=null;
+function dialog(o){return new Promise(function(res){
+ var m=document.getElementById("modal"),hasIn=o.input!=null;
+ m.innerHTML='<div class="mback"><div class="mbox" role="dialog" aria-modal="true"><h3>'+esc(o.title)+"</h3>"+(o.text?"<p>"+esc(o.text)+"</p>":"")+
+  (hasIn?'<input id="minp" value="'+esc(o.input)+'" placeholder="'+esc(o.ph||"")+'" enterkeyhint="done">':"")+
+  '<div class="mbtns"><button class="btn ghost" data-m="0">Mégse</button><button class="btn'+(o.danger?" danger":"")+'" data-m="1">'+esc(o.ok||"OK")+"</button></div></div></div>";
+ m.style.display="block";
+ var inp=document.getElementById("minp");if(inp)setTimeout(function(){inp.focus();},50);
+ function close(ok){m.style.display="none";m.innerHTML="";m.onclick=null;dialogClose=null;res(hasIn?(ok?inp.value.trim():null):!!ok);}
+ dialogClose=function(){close(false);};
+ m.onclick=function(e){e.stopPropagation();var b=e.target.closest("[data-m]");if(b)close(b.getAttribute("data-m")==="1");else if(e.target.classList.contains("mback"))close(false);};
+ if(inp)inp.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();close(true);}};
+});}
+var toastT;
+function toast(msg,ms){var t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},ms||3200);}
+
+/* ---------- HTTP ---------- */
+var pending={};
+window.__httpDone=function(id,status,body,url){var p=pending[id];if(p){delete pending[id];p({status:status,body:body,url:url||""});}};
+function http(method,url,headers,body){
+ if(NATIVE) return new Promise(function(res){var id=uid();pending[id]=res;AndroidBridge.http(id,method,url,JSON.stringify(headers||{}),body||"");});
+ return fetch(url,{method:method,headers:headers,body:body||undefined}).then(function(r){return r.text().then(function(t){return {status:r.status,body:t};});}).catch(function(){return {status:0,body:""};});
+}
+
+/* ---------- AI ---------- */
+var SYS="Egy magyar családi főzős app asszisztense vagy. Magyarul válaszolsz, mindig egyetlen érvényes JSON objektummal, semmi mással. A kalóriabecsléseid reálisak, egy adagra vonatkoznak.";
+async function ask(prompt,images){
+ if(!S.openaiKey) throw {code:"no_key"};
+ var content=(images&&images.length)?[{type:"text",text:prompt}].concat(images.map(function(u){return {type:"image_url",image_url:{url:u}};})):prompt;
+ var msgs=[{role:"system",content:SYS},{role:"user",content:content}];
+ var h={"Content-Type":"application/json","Authorization":"Bearer "+S.openaiKey};
+ var r=await http("POST",API,h,JSON.stringify({model:"gpt-4.1-mini",messages:msgs,response_format:{type:"json_object"},max_tokens:3500,temperature:0.8}));
+ if(r.status===404||(r.status===400&&/model/i.test(r.body))){
+  r=await http("POST",API,h,JSON.stringify({model:"gpt-5-mini",messages:msgs,response_format:{type:"json_object"},max_completion_tokens:7000,reasoning_effort:"minimal"}));
+ }
+ if(r.status===0) throw {code:"network"};
+ if(r.status===401||r.status===403) throw {code:"bad_key"};
+ if(r.status===429) throw {code:/insufficient_quota/.test(r.body)?"no_credit":"rate"};
+ if(r.status>=400) throw {code:"api"};
+ var d=JSON.parse(r.body);
+ var t=String((d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||"").replace(/```json|```/g,"").trim();
+ var a=t.indexOf("{"),b=t.lastIndexOf("}");
+ if(a<0||b<a) throw {code:"json"};
+ return JSON.parse(t.slice(a,b+1));
+}
+function aiErr(e){
+ var c=e&&e.code;
+ toast(c==="no_key"?"Add meg az OpenAI API-kulcsot a ⚙️ Beállításokban.":c==="bad_key"?"Érvénytelen OpenAI API-kulcs. Ellenőrizd a ⚙️ Beállításokban.":c==="no_credit"?"Elfogyott az OpenAI egyenleged. Tölts fel a platform.openai.com oldalon.":c==="rate"?"Túl sok kérés. Várj egy percet, és próbáld újra.":c==="network"?"Nincs internetkapcsolat. Ellenőrizd a netet, és próbáld újra.":"Az AI most nem adott használható választ. Próbáld újra.",5000);
+}
+
+function profile(){
+ var m={};
+ S.log.forEach(function(e){var k=norm(e.name);if(!m[k])m[k]={name:e.name,n:0,s:0};m[k].n++;m[k].s+=(e.rating||0);});
+ var arr=Object.keys(m).map(function(k){return m[k];});
+ var liked=arr.filter(function(x){return x.s>=0;}).sort(function(a,b){return (b.n+b.s*2)-(a.n+a.s*2);}).slice(0,18).map(function(x){return x.name;});
+ var bad=arr.filter(function(x){return x.s<0;}).map(function(x){return x.name;});
+ var recent=S.log.filter(function(e){return e.date&&(Date.now()-new Date(e.date).getTime())<10*864e5;}).map(function(e){return e.name;});
+ var p="Háztartás: "+S.household+" fő"+(people().length?" ("+people().join(", ")+")":"")+".";
+ if(S.avoid.trim()) p+=" Amit nem esznek / allergia: "+S.avoid.trim()+".";
+ if(liked.length) p+=" Szokásos, kedvelt ételeik: "+liked.join(", ")+".";
+ if(bad.length) p+=" Ezek nem ízlettek nekik: "+bad.join(", ")+".";
+ if(recent.length) p+=" Az elmúlt napokban ezeket ették, most ne ismételd: "+recent.join(", ")+".";
+ return p;
+}
+function pantryText(){return S.pantry.map(function(p){return p.name+(p.per?" (hamar romlik)":"");}).join(", ");}
+var MODES={any:["Bármi",""],quick:["Gyors","legfeljebb 30 perc alatt elkészíthető"],light:["Könnyű","könnyű, kevesebb kalóriás (kb. 350–550 kcal/adag)"],week:["Hétvégi","ráérős hétvégi, ünnepibb"],cheap:["Olcsó","olcsó, egyszerű alapanyagokból"]};
+function pixHint(){return S.pixKey?"":'<p class="hint">Az ételfotókhoz add meg az ingyenes Pixabay-kulcsot a ⚙️ Beállításokban.</p>';}
+var CARD=' Minden ételhez: {"name":"magyar név","nameEn":"rövid angol kifejezés fotókereséshez, pl. chicken paprikash","why":"egy rövid mondat, miért nekik való","kcal":szám,"timeMin":szám}';
+
+async function suggest(){
+ busy.sugg=true;render();
+ try{
+  var m=MODES[S.mode]||MODES.any;
+  var j=await ask("Ajánlj 5 ételt (ebédre vagy vacsorára) ennek a háztartásnak"+(m[1]?", ami "+m[1]:"")+". "+profile()+" Legyen köztük 3 a szokásaikhoz közeli, és 2 új, de hozzájuk illő étel."+CARD+' Formátum: {"items":[...]}');
+  S.sugg={mode:S.mode,items:(j.items||[]).slice(0,6),at:Date.now()};save();
+ }catch(e){aiErr(e);}
+ busy.sugg=false;render();
+}
+
+async function analyzeFridge(){
+ if(!fridgePhotos.length) return;
+ busy.fridge=true;render();
+ try{
+  var j=await ask("Ezek egy hűtő és/vagy kamra fotói. 1) Sorold fel magyarul a felismerhető élelmiszereket, csak amit valóban látsz (items: name, per: true ha pár napon belül megromlik vagy felbontott). 2) Ajánlj 5 ételt, ami főleg ezekből elkészíthető; alapokat (só, bors, olaj, liszt, cukor, víz) feltételezhetsz. A hamar romló dolgokat használd fel először. "+profile()+CARD+', plusz "uses":[felhasznált dolgok a hűtőből], "missing":[ami hiányzik]. Formátum: {"items":[{"name":"","per":false}],"suggestions":[...]}',fridgePhotos);
+  var added=0;
+  (j.items||[]).forEach(function(it){if(!it||!it.name)return;if(!S.pantry.some(function(p){return norm(p.name)===norm(it.name);})){S.pantry.push({id:uid(),name:it.name,per:!!it.per,at:Date.now()});added++;}});
+  S.fsugg={items:(j.suggestions||[]).slice(0,6),at:Date.now()};
+  fridgePhotos=[];save();
+  toast(added?added+" új tétel került a hűtő listájára.":"Nem találtam új tételt a fotókon.");
+ }catch(e){aiErr(e);}
+ busy.fridge=false;render();
+}
+async function fridgeIdeas(){
+ if(!S.pantry.length){toast("Előbb fotózd le a hűtőt, vagy írd be, mi van benne.");return;}
+ busy.fridge=true;render();
+ try{
+  var j=await ask("A hűtőben/kamrában ez van: "+pantryText()+". Ajánlj 5 ételt, ami főleg ezekből elkészíthető; alapokat (só, bors, olaj, liszt, cukor) feltételezhetsz. A hamar romló dolgokat használd fel először. "+profile()+CARD+', plusz "uses":[felhasznált dolgok], "missing":[ami hiányzik]. Formátum: {"suggestions":[...]}');
+  S.fsugg={items:(j.suggestions||[]).slice(0,6),at:Date.now()};save();
+ }catch(e){aiErr(e);}
+ busy.fridge=false;render();
+}
+
+function dayLabel(start,i){var d=new Date(start+"T12:00:00");d=new Date(d.getTime()+i*864e5);return DAYS[d.getDay()]+" ("+(d.getMonth()+1)+"."+d.getDate()+".)";}
+function ensurePlan(){
+ if(S.plan&&S.plan.start&&S.plan.slots) return;
+ var old=(S.plan&&S.plan.days)||[];
+ S.plan={start:dstr(),slots:[0,1,2,3,4,5,6].map(function(i){var d=old[i];return d&&d.name?{name:d.name,nameEn:d.nameEn||"",kcal:d.kcal||null,timeMin:d.timeMin||null}:null;}),shopping:(S.plan&&S.plan.shopping)||[]};
+}
+function newPlan(n){S.plan={start:dstr(),slots:new Array(n).fill(null),shopping:[]};save();}
+async function fillPlan(only){
+ ensurePlan();var P=S.plan;
+ var empty=[];P.slots.forEach(function(x,i){if(!x&&(only==null||only===i))empty.push(i);});
+ if(!empty.length){toast("Minden nap ki van töltve.");return;}
+ busy.plan=true;busy.planDay=only;render();
+ try{
+  var fixed=P.slots.map(function(x,i){return x?dayLabel(P.start,i)+": "+x.name:null;}).filter(Boolean);
+  var known=topDishes().map(function(t){return t.name;}).slice(0,40);
+  var j=await ask("Heti vacsora-menüt állítunk össze. "+(fixed.length?"Ezek a napok már el vannak döntve: "+fixed.join("; ")+". ":"")+"Válassz ételt ezekre a napokra: "+empty.map(function(i){return dayLabel(P.start,i);}).join(", ")+". "+
+   (known.length?"Elsősorban az általuk már beírt ételek közül válassz: "+known.join(", ")+"; legfeljebb egy-két új, hozzájuk illő étel lehet. ":"")+
+   profile()+(S.pantry.length?" A hűtőben ez van, használd fel: "+pantryText()+".":"")+" Ne ismételd a már kiválasztottakat, és a hozzávalók fedjék át egymást."+CARD+', plusz "day":"a nap címkéje". Pontosan '+empty.length+' elem, a megadott napok sorrendjében. Formátum: {"days":[...]}');
+  (j.days||[]).slice(0,empty.length).forEach(function(d,n){if(d&&d.name)P.slots[empty[n]]={name:d.name,nameEn:d.nameEn||"",kcal:d.kcal||null,timeMin:d.timeMin||null,why:d.why||""};});
+  P.shopping=[];save();
+ }catch(e){aiErr(e);}
+ busy.plan=false;busy.planDay=null;render();
+}
+async function planShopping(){
+ ensurePlan();var names=S.plan.slots.filter(Boolean).map(function(x){return x.name;});
+ if(!names.length){toast("Előbb válassz ételeket a napokra.");return;}
+ busy.pshop=true;render();
+ try{
+  var j=await ask("Ezeket az ételeket főzzük a héten, "+S.household+" főre: "+names.join(", ")+". "+(S.pantry.length?"A hűtőben már van: "+pantryText()+". ":"")+'Állítsd össze a bevásárlólistát: minden hozzávaló, ami kell, de nincs itthon, összesítve, reális mennyiséggel. Alapokat (só, bors, olaj) ne írj. Formátum: {"shopping":[{"name":"","qty":"pl. 1 kg"}]}');
+  S.plan.shopping=j.shopping||[];save();
+ }catch(e){aiErr(e);}
+ busy.pshop=false;render();
+}
+function knownDishes(){
+ var m={};
+ topDishes().forEach(function(t){m[norm(t.name)]={name:t.name,n:t.n,s:t.s};});
+ Object.keys(S.recipes).forEach(function(k){var r=S.recipes[k];var nk=norm(r.name);if(!m[nk])m[nk]={name:r.name,n:0,s:0};m[nk].r=r;});
+ return Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return (b.r&&b.r.fav?1:0)-(a.r&&a.r.fav?1:0)||(b.n+b.s)-(a.n+a.s)||a.name.localeCompare(b.name,"hu");});
+}
+function slotFrom(name){var r=S.recipes[keyOf(name)];return {name:name,nameEn:r?r.nameEn:"",kcal:r?r.kcal:null,timeMin:r?r.timeMin:null};}
+
+function extractUrl(t){var m=String(t||"").match(/https?:\/\/[^\s"<>]+/);return m?m[0].replace(/[).,!?]+$/,""):"";}
+function siteOf(u){return /tiktok/i.test(u)?"TikTok":/youtu/i.test(u)?"YouTube":/instagram/i.test(u)?"Instagram":/facebook|fb\.watch|fb\.com/i.test(u)?"Facebook":"Videó";}
+function decodeHtml(x){var t=document.createElement("textarea");t.innerHTML=x;return t.value;}
+function metaTag(html,prop){
+ var res=[new RegExp('<meta[^>]+(?:property|name)=["\']'+prop+'["\'][^>]*?content=(?:"([^"]*)"|\'([^\']*)\')','i'),new RegExp('<meta[^>]+content=(?:"([^"]*)"|\'([^\']*)\')[^>]*?(?:property|name)=["\']'+prop+'["\']','i')];
+ for(var i=0;i<2;i++){var m=html.match(res[i]);if(m) return decodeHtml(m[1]||m[2]||"");}
+ return "";
+}
+function jsonStr(html,key){var m=html.match(new RegExp('"'+key+'":"((?:[^"\\\\]|\\\\.)*)"'));if(!m)return "";try{return JSON.parse('"'+m[1]+'"');}catch(e){return "";}}
+async function videoMeta(url){
+ var out={url:url,site:siteOf(url),title:"",text:"",author:"",thumb:""};
+ var H={"Accept-Language":"hu-HU,hu;q=0.9,en;q=0.8","Accept":"text/html,application/xhtml+xml,*/*;q=0.8","Cookie":"CONSENT=YES+cb; SOCS=CAI"};
+ try{
+  if(out.site==="YouTube"){
+   var id=(url.match(/(?:v=|youtu\.be\/|shorts\/|live\/|embed\/)([\w-]{11})/)||[])[1];
+   if(id){
+    out.thumb="https://i.ytimg.com/vi/"+id+"/hqdefault.jpg";
+    var r=await http("GET","https://www.youtube.com/watch?v="+id,H,"");
+    if(r.status===200){out.text=jsonStr(r.body,"shortDescription");out.title=metaTag(r.body,"og:title");out.author=jsonStr(r.body,"ownerChannelName");}
+    if(!out.title){var o=await http("GET","https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id),{},"");if(o.status===200){var oj=JSON.parse(o.body);out.title=oj.title||"";out.author=oj.author_name||"";}}
+   }
+  }else if(out.site==="TikTok"){
+   var r1=await http("GET",url,H,"");var fu=(r1.url&&/tiktok\.com\/@/.test(r1.url))?r1.url.split("?")[0]:url;
+   if(r1.status===200){out.text=jsonStr(r1.body,"desc");if(!out.text)out.text=metaTag(r1.body,"og:description");out.video=jsonStr(r1.body,"playAddr")||jsonStr(r1.body,"downloadAddr");}
+   var r2=await http("GET","https://www.tiktok.com/oembed?url="+encodeURIComponent(fu),{},"");
+   if(r2.status===200){var j=JSON.parse(r2.body);if(!out.text)out.text=j.title||"";out.title=j.title&&j.title!==out.text?j.title:"";out.author=j.author_name||"";out.thumb=j.thumbnail_url||"";}
+  }else{
+   var r3=await http("GET",url,H,"");
+   if(r3.status===200){out.title=metaTag(r3.body,"og:title");out.text=metaTag(r3.body,"og:description")||metaTag(r3.body,"description");out.thumb=metaTag(r3.body,"og:image");}
+  }
+ }catch(e){}
+ return out;
+}
+function nativeCall(fn){return new Promise(function(res){var id=uid();pending[id]=res;fn(id);});}
+async function framesVia(fn){if(!NATIVE)return null;var r=await nativeCall(fn);if(r.status!==200||!r.body)return null;try{var a=JSON.parse(r.body);return a.length?a:null;}catch(e){return null;}}
+async function importVideo(top){
+ busy.imp=true;top.err="";top.stage="A videó adatait olvasom…";render();
+ top.frames=top.frames||[];
+ try{
+  var url=extractUrl(top.url);
+  var meta=url?await videoMeta(url):{site:"",title:"",text:"",author:"",thumb:""};
+  if(meta.video&&!top.frames.length){top.stage="Letöltöm a videót, és kiolvasom a képkockákat…";render();
+   var fr=await framesVia(function(id){AndroidBridge.videoFramesUrl(id,meta.video,"https://www.tiktok.com/");});if(fr)top.frames=fr;}
+  var imgs=top.frames.concat(top.shots);
+  var txt=[meta.title,meta.text,top.text].filter(function(x){return x&&x.trim();}).join("\n\n").slice(0,6000);
+  var recHint=" Ha a recept a videóba van írva: indítsd el a telefon képernyőfelvételét, játszd le a videót, és válaszd ki itt a felvételt a „Videó vagy képernyőfelvétel” gombbal.";
+  if(!txt.trim()&&!imgs.length){
+   top.err=url?"Nem sikerült adatot kiolvasni a videóból ("+meta.site+")."+recHint:"Adj meg egy linket, videót, szöveget vagy képernyőképet.";
+   busy.imp=false;render();return;
+  }
+  top.stage=imgs.length?"Leolvasom a receptet "+imgs.length+" képről…":"Kiolvasom a receptet…";render();
+  var j=await ask("Egy főzős videóból kell receptet készítened. "+(txt?'A videó címe és leírása:\n"""\n'+txt+'\n"""\n':"")+
+   (imgs.length?"Mellékelve "+imgs.length+" kép a videóból (időrendben kivágott képkockák és/vagy képernyőképek). A recept gyakran feliratként a videóra van írva: olvasd le az összes képről a hozzávalókat, mennyiségeket és lépéseket, rakd össze őket sorrendben, és használd azt is, ami a főzés közben látszik.\n":"")+
+   "Írd meg a receptet magyarul, metrikus mértékegységekkel, "+S.household+" adagra átszámolva. Ha egy mennyiség nem szerepel, becsüld meg reálisan. "+
+   'Ha a forrásban nincs teljes recept, de kiderül, milyen étel, írj rá bevált receptet, és legyen "fromVideo":false. Ha még az étel sem derül ki, válaszolj így: {"ok":false,"reason":"rövid magyar indoklás"}. '+
+   'Különben: {"ok":true,"fromVideo":true,'+(imgs.length?'"cover":[a képek sorszámai 0-tól, legfeljebb 5, a legjobb borítókép-jelöltek a legjobbal kezdve: éles, nem elmosódott, a kész vagy majdnem kész ételt mutatja közelről, étvágygerjesztően, lehetőleg kéz, kés és nagy felirat nélkül],"coverPos":"top|center|bottom: hol van az étel a legjobb képen függőlegesen",':'')+'"recipe":'+recipeSchema(S.household)+'}. Ahol várni kell, adj timerMin-t.',imgs);
+  var r=j.recipe;
+  if(!j.ok||!r||!r.ingredients||!r.steps){top.err=(j.reason||"Nem találtam receptet a videó adataiban.")+(top.frames.length?"":recHint);busy.imp=false;render();return;}
+  var k=keyOf(r.name),ik=norm(r.name);
+  r.key=k;r.at=Date.now();r.fav=true;r.servings=r.servings||S.household;r.nameEn=r.nameEn||r.name;
+  setFolderFromAI(r,r.folder,S.recipes[k]&&S.recipes[k].folders);delete r.folder;
+  r.source={url:url,site:meta.site||(top.frames.length?"videófelvétel":""),author:meta.author||"",fromVideo:j.fromVideo!==false};
+  S.recipes[k]=r;
+  var cands=[],seenI={};
+  (Array.isArray(j.cover)?j.cover:[]).forEach(function(i){i=parseInt(i,10);if(i>=0&&i<imgs.length&&!seenI[i]){seenI[i]=1;cands.push(imgs[i]);}});
+  var aiN=cands.length;
+  if(meta.thumb&&NATIVE){var fr=await fetchImg(meta.thumb);if(fr.status===200&&fr.body&&fr.body.indexOf("data:image")===0)cands.push(fr.body);}
+  imgs.forEach(function(u,i){if(!seenI[i])cands.push(u);});
+  if(cands.length){
+   cands=cands.slice(0,24);if(!aiN&&top.frames.length){var last=top.frames[top.frames.length-1];cands=[last].concat(cands.filter(function(x){return x!==last;}));}
+   r.vfc=cands.length;
+   try{await ownPut("px:"+ik,cands[0]);if(cands.length>1)await ownPut("vf:"+ik,JSON.stringify(cands));}catch(e){}
+   ownMem["px:"+ik]=cands[0];if(cands.length>1)ownMem["vf:"+ik]=JSON.stringify(cands);
+   var pos=/^(top|bottom)$/.test(j.coverPos)?j.coverPos:"center";
+   S.img[ik]={px:1,by:meta.author||"Kép a videóból",l:url||"",site:meta.site||"",vf:cands.length,vi:0,pos:aiN?pos:"center"};
+  }
+  save();busy.imp=false;
+  stack=stack.filter(function(x){return x!==top;});
+  stack.push({t:"recipe",k:k,name:r.name,en:r.nameEn});render();scrollTop();
+  toast("Elmentettem a receptek közé ❤️. A heti menübe is választható.",4500);
+  return;
+ }catch(e){aiErr(e);}
+ busy.imp=false;render();
+}
+window.onVideoWorking=function(){if(S.setup)toast("Kiolvasom a képkockákat a videóból… ez fél–egy percig is eltarthat.",8000);};
+window.checkShared=function(){
+ if(!NATIVE||!S.setup)return;
+ var raw=AndroidBridge.takeShared();if(!raw)return;
+ var o;try{o=JSON.parse(raw);}catch(e){return;}
+ stopCam();stack=stack.filter(function(x){return x.t!=="camera"&&x.t!=="import";});
+ var u=extractUrl(o.text),rest=String(o.text||"").replace(u,"").trim();
+ var top={t:"import",url:u,text:rest.length>80?rest:"",shots:o.images||[],frames:o.frames||[],err:""};
+ stack.push(top);render();scrollTop();
+ if(top.url||top.shots.length||top.frames.length) importVideo(top);
+ else if(o.frames) {top.err="Ebből a videóból nem sikerült képkockákat kiolvasni.";render();}
+};
+function vImport(top){
+ var h='<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button></div><main style="padding-top:0"><h1>Recept videóból</h1><p class="hint">TikTok, YouTube, Facebook vagy Instagram link. Gyorsabb, ha a videónál a <b>Megosztás</b> gombbal egyenesen a Főzzünk!-nek küldöd.</p>'+
+  '<div class="field"><label for="iu">Videó linkje</label><input id="iu" inputmode="url" placeholder="https://…" value="'+esc(top.url)+'"></div>'+
+  '<div class="field"><label for="it">Recept szövege (nem kötelező)</label><textarea id="it" rows="3" placeholder="Ha a leírásban vagy kommentben van a recept, bemásolhatod ide.">'+esc(top.text)+'</textarea></div>'+
+  '<div class="field"><label>Ha a recept a videóba van írva</label><p class="hint" style="margin-top:0"><b>TikTok:</b> a link általában elég, az app maga kiolvassa a videót.<br><b>YouTube, Facebook, Instagram:</b> indítsd el a telefon képernyőfelvételét, játszd le a videót, és válaszd ki itt a felvételt (vagy oszd meg a Főzzünk!-kel). Képernyőképek is jók.</p>'+
+  (top.frames&&top.frames.length?'<p class="small" style="margin:0 0 6px">🎞 '+top.frames.length+' képkocka a videóból <button class="btn ghost sm" data-act="impFramesRm">Törlés</button></p><div class="thumbs" style="margin-bottom:10px">'+top.frames.map(function(u){return '<div class="thumb" style="width:60px;height:92px"><img alt="" src="'+u+'"></div>';}).join("")+"</div>":"")+
+  (NATIVE?'<button class="btn ghost wide" style="margin-bottom:10px" data-act="impVideo">🎥 Videó vagy képernyőfelvétel</button>':"")+
+  (top.shots.length?'<div class="thumbs" style="margin-bottom:10px">'+top.shots.map(function(u,i){return '<div class="thumb"><img alt="" src="'+u+'"><button data-act="impRm" data-i="'+i+'" aria-label="Törlés">✕</button></div>';}).join("")+"</div>":"")+
+  '<button class="btn ghost wide" data-act="impShots">🖼 Képernyőképek hozzáadása</button></div>';
+ if(top.err) h+='<div class="panel" style="border-color:var(--pap);margin-bottom:14px">'+esc(top.err)+"</div>";
+ h+=busy.imp?loadingHTML(top.stage||"Dolgozom…"):'<button class="btn wide" data-act="impGo">Recept készítése</button>';
+ return h+"</main>";
+}
+async function autoSort(){
+ var todo=Object.keys(S.recipes).map(function(k){return S.recipes[k];}).filter(function(r){return !recFolders(r).length;});
+ if(!todo.length){toast("Minden recept mappában van.");return;}
+ busy.sort=true;render();
+ try{
+  var j=await ask("Sorold mappákba ezeket a recepteket. Mappák: "+folderNames()+". Receptek: "+todo.map(function(r){return r.name;}).join("; ")+'. Minden recepthez pontosan egy mappa nevét add meg, pontosan a fenti írásmóddal. Formátum: {"map":{"recept neve":"mappa neve"}}');
+  var m=j.map||{},c=0;
+  todo.forEach(function(r){var name=m[r.name];if(!name){Object.keys(m).forEach(function(k){if(norm(k)===norm(r.name))name=m[k];});}var f=folderByName(name);if(f){r.folders=[f.id];c++;}});
+  save();toast(c+" receptet mappába tettem.");
+ }catch(e){aiErr(e);}
+ busy.sort=false;render();
+}
+async function ownDel(k){try{var d=await db();d.transaction("photos","readwrite").objectStore("photos").delete(k);}catch(e){}delete ownMem[k];}
+async function deleteRecipe(k){
+ var r=S.recipes[k];if(!r)return;
+ var ok=await dialog({title:"Recept törlése",text:"Törlöd a(z) „"+r.name+"” receptet? A naplóban megmaradnak a bejegyzései.",ok:"Törlés",danger:true});
+ if(!ok)return;
+ var ik=norm(r.name);
+ delete S.recipes[k];delete S.img[ik];if(S.own[k]){delete S.own[k];ownDel(k);}ownDel("px:"+ik);ownDel("vf:"+ik);
+ save();
+ stack=stack.filter(function(x){return !((x.t==="recipe"||x.t==="cook"||x.t==="rfold")&&x.k===k);});
+ render();toast("Recept törölve.");
+}
+async function newFolder(cb){
+ var n=await dialog({title:"Új mappa",text:"Ha emojival kezded, az lesz a mappa ikonja.",input:"",ph:"pl. 🍕 Pizzák",ok:"Létrehozás"});
+ if(!n)return;
+ var m=n.match(/^(\p{Extended_Pictographic}[\uFE0F\u200D\p{Extended_Pictographic}]*)\s*(.*)$/u);
+ var f={id:"f"+uid(),e:m&&m[2]?m[1]:"📁",n:m&&m[2]?m[2]:n};
+ S.folders.push(f);save();if(cb)cb(f);render();
+}
+function folderCount(id){var c=0;Object.keys(S.recipes).forEach(function(k){var r=S.recipes[k];var fs=recFolders(r);if(id==="_all"||(id==="_none"?!fs.length:fs.indexOf(id)>=0))c++;});return c;}
+function recipesIn(id){return Object.keys(S.recipes).map(function(k){return S.recipes[k];}).filter(function(r){var fs=recFolders(r);return id==="_all"||(id==="_none"?!fs.length:fs.indexOf(id)>=0);}).sort(function(a,b){return (b.fav?1:0)-(a.fav?1:0)||String(a.name||"").localeCompare(String(b.name||""),"hu");});}
+function recipeRows(rs,del){return '<div class="panel"><ul class="list">'+rs.map(function(r){return '<li data-act="open" data-name="'+esc(r.name)+'" data-en="'+esc(r.nameEn)+'"><div class="grow"><b>'+(r.fav?"❤️ ":"")+esc(r.name)+'</b><div class="small">'+Math.round(r.kcal||0)+" kcal / adag, "+Math.round(r.timeMin||0)+" perc"+(recFolders(r).length?" · "+recFolders(r).map(function(id){var f=folderById(id);return f.e+" "+esc(f.n);}).join(", "):"")+'</div></div>'+(del?'<button class="x" data-act="rDel" data-k="'+esc(r.key)+'" aria-label="Recept törlése">🗑</button>':'<span class="small">›</span>')+'</li>';}).join("")+"</ul></div>";}
+function vFolder(top){
+ var f=top.id==="_all"?{e:"📚",n:"Összes recept"}:top.id==="_none"?{e:"📂",n:"Mappa nélkül"}:folderById(top.id);
+ if(!f){stack.pop();return vShell();}
+ var rs=recipesIn(top.id),own=top.id.charAt(0)!=="_";
+ var h='<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button>'+(own?'<div class="row"><button class="btn ghost sm" data-act="fRename">Átnevezés</button><button class="btn ghost sm" data-act="fDelete">Törlés</button></div>':"")+'</div><main style="padding-top:0"><h1 style="margin-bottom:14px">'+f.e+" "+esc(f.n)+"</h1>";
+ h+=rs.length?recipeRows(rs,true):'<div class="empty"><b>'+f.e+'</b>Még üres. Egy recept oldalán a 📁 Mappák gombbal teheted ide.</div>';
+ return h+"</main>";
+}
+function vfCount(r){var im=S.img[norm(r.name)];return r.vfc||(im&&im.vf)||0;}
+function vImgPick(top){
+ var r=S.recipes[top.k];if(!r){stack.pop();return vShell();}var ik=norm(r.name),im=S.img[ik]||{};
+ var h='<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button></div><main style="padding-top:0"><h1>Borítókép</h1><p class="hint">Koppints arra a képre a videóból, amelyik legyen az étel képe.</p><div class="framegrid" id="fgrid">'+loadingHTML("Képek betöltése…")+"</div>";
+ h+='<div style="display:grid;gap:10px;margin-top:16px">'+(S.pixKey?'<button class="btn ghost" data-act="imgPix">Kép a Pixabayről</button>':"")+'<div class="row"><button class="btn ghost" style="flex:1" data-act="dishCam">📷 Saját fotó</button><button class="btn ghost" style="flex:1" data-act="dishGal">🖼 Galériából</button></div></div></main>';
+ setTimeout(function(){ownGet("vf:"+ik).then(function(js){var g=document.getElementById("fgrid");if(!g)return;var arr=[];try{arr=JSON.parse(js||"[]");}catch(e){}
+  g.innerHTML=arr.length?arr.map(function(u,i){return '<button class="frame'+(i===(im.vi||0)&&!S.own[r.key]?" on":"")+'" data-act="imgSet" data-i="'+i+'" aria-label="'+(i+1)+'. kép"><img alt="" src="'+u+'"></button>';}).join(""):'<p class="hint">A videó képei nem érhetők el. Oszd meg újra a videót az appal.</p>';});},0);
+ return h;
+}
+function cropKey(r){return S.own[r.key]?r.key:"px:"+norm(r.name);}
+async function cropOpen(k){
+ var r=S.recipes[k];if(!r)return;var key=cropKey(r);
+ var src=await ownGet("orig:"+key)||await ownGet(key);
+ if(!src){var im=S.img[norm(r.name)];if(im&&im.url)src=im.url;}
+ if(!src){toast("Ehhez a recepthez nincs elmentett kép.");return;}
+ stack.push({t:"crop",k:k,key:key,src:src});render();scrollTop();
+}
+var C=null;
+function vCrop(top){
+ setTimeout(cropInit,0);
+ return '<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Mégse">←</button></div><main style="padding-top:0"><h1>Kép igazítása</h1><p class="hint">Húzd ujjal a képet, két ujjal nagyíts vagy kicsinyíts. Alul a csúszkával is méretezhetsz.</p>'+
+  '<div class="cropvp" id="cvp"><img class="cbg" alt="" src="'+esc(top.src)+'"><img class="cimg" id="cimg" alt="" src="'+esc(top.src)+'" draggable="false"><div class="cgrid"></div></div>'+
+  '<div class="row" style="margin:16px 0 6px;gap:12px"><span aria-hidden="true">➖</span><input type="range" id="czoom" min="0" max="1000" value="0" aria-label="Méret" style="flex:1;padding:0;border:0;background:none"><span aria-hidden="true">➕</span></div>'+
+  '<div class="row" style="gap:10px;margin-top:14px"><button class="btn ghost" style="flex:1" data-act="cropReset">Alaphelyzet</button><button class="btn" style="flex:1" data-act="cropSave">Mentés</button></div></main>';
+}
+function cropInit(){
+ var top=stack[stack.length-1],vp=document.getElementById("cvp"),img=document.getElementById("cimg");if(!top||top.t!=="crop"||!vp||!img)return;
+ var go=function(){
+  var b=vp.getBoundingClientRect();
+  C={top:top,vp:vp,img:img,W:b.width,H:b.height,w:img.naturalWidth,h:img.naturalHeight,pts:{},last:null};
+  if(!C.w||!C.h)return;
+  C.cover=Math.max(C.W/C.w,C.H/C.h);C.min=Math.min(C.W/C.w,C.H/C.h);C.max=C.cover*4;
+  if(top.st){C.s=top.st.s;C.x=top.st.x;C.y=top.st.y;}else cropReset();
+  cropApply();
+  vp.onpointerdown=function(e){vp.setPointerCapture(e.pointerId);C.pts[e.pointerId]={x:e.clientX,y:e.clientY};C.last=null;};
+  vp.onpointermove=function(e){if(!C.pts[e.pointerId])return;var prev=C.pts[e.pointerId];C.pts[e.pointerId]={x:e.clientX,y:e.clientY};
+   var ids=Object.keys(C.pts);
+   if(ids.length===1){C.x+=e.clientX-prev.x;C.y+=e.clientY-prev.y;}
+   else if(ids.length>=2){var a=C.pts[ids[0]],b2=C.pts[ids[1]];var d=Math.hypot(a.x-b2.x,a.y-b2.y),mx=(a.x+b2.x)/2-C.vp.getBoundingClientRect().left,my=(a.y+b2.y)/2-C.vp.getBoundingClientRect().top;
+    if(C.last){cropZoomAt(C.s*d/C.last.d,mx,my);C.x+=mx-C.last.mx;C.y+=my-C.last.my;}C.last={d:d,mx:mx,my:my};}
+   cropApply();};
+  var up=function(e){delete C.pts[e.pointerId];C.last=null;};
+  vp.onpointerup=up;vp.onpointercancel=up;
+  vp.onwheel=function(e){e.preventDefault();var b3=vp.getBoundingClientRect();cropZoomAt(C.s*(e.deltaY<0?1.08:1/1.08),e.clientX-b3.left,e.clientY-b3.top);cropApply();};
+ };
+ if(img.complete&&img.naturalWidth)go();else img.onload=go;
+}
+function cropZoomAt(ns,px,py){ns=Math.max(C.min,Math.min(C.max,ns));var f=ns/C.s;C.x=px-(px-C.x)*f;C.y=py-(py-C.y)*f;C.s=ns;}
+function cropReset(){if(!C)return;C.s=C.cover;C.x=(C.W-C.w*C.s)/2;C.y=(C.H-C.h*C.s)/2;}
+function cropApply(){
+ var iw=C.w*C.s,ih=C.h*C.s;
+ C.x=iw>=C.W?Math.min(0,Math.max(C.W-iw,C.x)):Math.max(0,Math.min(C.W-iw,C.x));
+ C.y=ih>=C.H?Math.min(0,Math.max(C.H-ih,C.y)):Math.max(0,Math.min(C.H-ih,C.y));
+ C.img.style.width=C.w+"px";C.img.style.height=C.h+"px";
+ C.img.style.transform="translate("+C.x+"px,"+C.y+"px) scale("+C.s+")";
+ C.top.st={s:C.s,x:C.x,y:C.y};
+ var z=document.getElementById("czoom");if(z)z.value=Math.round(1000*Math.log(C.s/C.min)/Math.log(C.max/C.min));
+}
+function cropSlider(v){if(!C)return;var ns=C.min*Math.pow(C.max/C.min,v/1000);cropZoomAt(ns,C.W/2,C.H/2);cropApply();}
+async function cropSave(){
+ if(!C)return;var top=C.top,r=S.recipes[top.k];if(!r)return;
+ var OW=1280,OH=Math.round(OW*C.H/C.W),k=OW/C.W,cv=document.createElement("canvas");cv.width=OW;cv.height=OH;var g=cv.getContext("2d");
+ g.fillStyle="#1b2733";g.fillRect(0,0,OW,OH);
+ var iw=C.w*C.s,ih=C.h*C.s;
+ if(iw<C.W-1||ih<C.H-1){var cs=Math.max(OW/C.w,OH/C.h);try{g.filter="blur(28px) brightness(0.85)";}catch(e){}g.drawImage(C.img,(OW-C.w*cs)/2,(OH-C.h*cs)/2,C.w*cs,C.h*cs);try{g.filter="none";}catch(e){}}
+ g.drawImage(C.img,C.x*k,C.y*k,iw*k,ih*k);
+ var out;try{out=cv.toDataURL("image/jpeg",0.86);}catch(e){toast("Ezt a képet nem lehet szerkeszteni. Válassz másikat, vagy használd a saját fotót.");return;}
+ var orig=await ownGet("orig:"+top.key);
+ try{if(!orig)await ownPut("orig:"+top.key,top.src);await ownPut(top.key,out);}catch(e){toast("Nem sikerült menteni a képet.");return;}
+ ownMem[top.key]=out;
+ var ik=norm(r.name);if(top.key.indexOf("px:")===0){var im=S.img[ik]||{px:1,by:"Kép",site:""};im.px=1;im.crop=true;delete im.url;S.img[ik]=im;}
+ save();C=null;stack.pop();render();toast("Kép elmentve.");
+}
+function normUpd(u){if(!u)return "";var m=u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(?:blob|raw)\/([^\/]+)\/(.+)$/);return m?"https://raw.githubusercontent.com/"+m[1]+"/"+m[2]+"/"+m[3]+"/"+m[4]:u;}
+function updUrl(){return S.updUrl||DEFAULT_UPD;}
+function verGt(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y;}return false;}
+function updInfo(){if(!NATIVE)return {};try{return JSON.parse(AndroidBridge.updateInfo()||"{}");}catch(e){return {};}}
+var updState={checking:false,msg:""};
+async function checkUpdate(manual){
+ if(!NATIVE||updState.checking)return;
+ updState.checking=true;updState.msg="";if(manual)render();
+ try{
+  var r=await http("GET",updUrl()+(updUrl().indexOf("?")<0?"?":"&")+"t="+Date.now(),{"Cache-Control":"no-cache"},"");
+  S.updAt=Date.now();save();
+  if(r.status!==200){updState.msg=r.status===404?"A frissítési fájl nem található a megadott címen.":"Nem sikerült elérni a frissítési címet (kód: "+r.status+").";return;}
+  var m=r.body.match(/var APP_VER\s*=\s*"([\d.]+)"/);
+  if(!m||r.body.length<20000||r.body.indexOf("</html>")<0||r.body.indexOf("AndroidBridge")<0){updState.msg="A letöltött fájl nem a Főzzünk! app.";return;}
+  var v=m[1],info=updInfo();
+  if(!verGt(v,APP_VER)){updState.msg="Ez a legfrissebb verzió ✅ ("+APP_VER+")";return;}
+  if((info.bad||"").indexOf("|"+v+"|")>=0){updState.msg="A(z) "+v+" verzió korábban hibásan indult, ezért kihagyom. Várd meg a következő javítást.";return;}
+  if(info.pending===v){updState.msg="A(z) "+v+" verzió már le van töltve, a következő indításkor betöltődik.";if(manual)askApply(v);return;}
+  if(!AndroidBridge.saveUpdate(r.body,v)){updState.msg="Nem sikerült menteni a frissítést.";return;}
+  updState.msg="Letöltve: "+v+". A következő indításkor betöltődik.";
+  if(manual)askApply(v);else toast("Új verzió letöltve ("+v+"). A következő indításkor betöltődik.",5000);
+ }catch(e){updState.msg="Hiba a frissítés keresésekor.";}
+ finally{updState.checking=false;var t=stack[stack.length-1];if(t&&t.t==="settings")render();}
+}
+function askApply(v){dialog({title:"Új verzió: "+v,text:"Letöltöttem a frissítést. Betöltöd most? Az adataid megmaradnak.",ok:"Betöltés most"}).then(function(ok){if(ok)AndroidBridge.applyNow();});}
+function vUpdSection(){
+ if(!NATIVE)return "";
+ var info=updInfo();
+ return '<div class="sec" style="margin-top:30px"><h2>Frissítés</h2><p class="hint">Jelenlegi verzió: <b>'+APP_VER+"</b>"+(info.active?" (letöltött frissítés)":" (telepített)")+'. Az app néhány óránként magától keres új verziót a GitHubon.</p>'+
+  (updState.checking?loadingHTML("Frissítés keresése…"):'<button class="btn ghost wide" data-act="updCheck">🔄 Frissítés keresése most</button>')+
+  (updState.msg?'<p class="hint" style="margin-top:10px">'+esc(updState.msg)+"</p>":"")+
+  '<details style="margin-top:12px"><summary class="small">Haladó beállítások</summary><div class="field" style="margin-top:10px"><label for="f-upd">Frissítési cím (GitHub-link)</label><input id="f-upd" inputmode="url" value="'+esc(S.updUrl||"")+'" placeholder="'+esc(DEFAULT_UPD)+'"><div class="hint">Üresen hagyva az alapértelmezett címet használja. A Mentés gombbal mentheted.</div></div>'+
+  (info.active?'<button class="btn ghost sm" data-act="updReset">Vissza a telepített verzióra</button>':"")+"</details></div>";
+}
+function vRFold(top){
+ var r=S.recipes[top.k];if(!r){stack.pop();return vShell();}var fs=recFolders(r);
+ return '<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Kész">←</button></div><main style="padding-top:0"><h1>Mappák</h1><p class="hint">'+esc(r.name)+': több mappába is teheted.</p><div class="panel"><ul class="list">'+
+  S.folders.map(function(f){var on=fs.indexOf(f.id)>=0;return '<li data-act="fToggle" data-id="'+f.id+'"><span class="chk'+(on?" on":"")+'">'+(on?"✓":"")+'</span><div class="grow">'+f.e+" "+esc(f.n)+"</div></li>";}).join("")+
+  '</ul></div><button class="btn ghost wide" style="margin-top:12px" data-act="fNew">+ Új mappa</button><button class="btn wide" style="margin-top:10px" data-act="back">Kész</button></main>';
+}
+function recipeSchema(serv){return '{"name":"","nameEn":"rövid angol fotókereső kifejezés","folder":"pontosan egy ezek közül, ami a legjobban illik: '+folderNames()+'","servings":'+serv+',"timeMin":szám,"difficulty":"könnyű|közepes|nehéz","kcal":egy adag kcal,"protein":g/adag,"carbs":g/adag,"fat":g/adag,'+
+   '"ingredients":[{"name":"","qty":szám vagy null,"unit":"g|dkg|kg|ml|dl|l|db|ek|tk|csipet|gerezd|csokor|"}],"steps":[{"text":"rövid, egyértelmű lépés","timerMin":szám vagy null}],"tip":"egy hasznos tipp"'+
+   (S.dogs?',"dog":{"safe":["ebből az ételből natúran, fűszer nélkül kutyának adható összetevők"],"avoid":["ebben az ételben lévő, kutyának veszélyes dolgok (pl. hagyma, fokhagyma, főtt csont, szőlő, csoki, xilit, erős fűszer)"],"note":"egy mondat"}':"")+"}";}
+async function genRecipe(item){
+ var k=keyOf(item.name);
+ busy["r"+k]=true;render();
+ try{
+  var serv=Math.max(1,S.household|0||2);
+  var j=await ask('Írj részletes, bevált házias receptet: "'+item.name+'", '+serv+" adagra. "+(S.avoid.trim()?"Vedd figyelembe: "+S.avoid.trim()+". ":"")+(S.pantry.length?"A hűtőben ez van, ha lehet, ezekkel dolgozz: "+pantryText()+". ":"")+
+   'Formátum: '+recipeSchema(serv)+". Ahol várni kell (főzés, sütés, pihentetés, kelesztés), adj timerMin-t.");
+  if(!j.ingredients||!j.steps) throw {code:"json"};
+  j.key=k;j.name=j.name||item.name;j.nameEn=j.nameEn||item.nameEn||item.name;j.at=Date.now();j.fav=(S.recipes[k]&&S.recipes[k].fav)||false;
+  setFolderFromAI(j,j.folder,S.recipes[k]&&S.recipes[k].folders);delete j.folder;
+  S.recipes[k]=j;trimRecipes();save();
+ }catch(e){aiErr(e);if(stack.length&&stack[stack.length-1].k===k&&!S.recipes[k])stack.pop();}
+ busy["r"+k]=false;render();
+}
+function trimRecipes(){
+ var ks=Object.keys(S.recipes).filter(function(k){return !S.recipes[k].fav;}).sort(function(a,b){return S.recipes[b].at-S.recipes[a].at;});
+ ks.slice(40).forEach(function(k){delete S.recipes[k];});
+ var ik=Object.keys(S.img);if(ik.length>250)ik.slice(0,ik.length-250).forEach(function(k){delete S.img[k];});
+}
+
+/* ---------- photos ---------- */
+var imgWait={};
+var pixWarned=false,imgErrShown=false;
+function imgErr(msg){if(imgErrShown)return;imgErrShown=true;toast(msg,6000);}
+function fetchImg(url){
+ if(NATIVE) return new Promise(function(res){var id=uid();pending[id]=res;AndroidBridge.fetchImage(id,url);});
+ return Promise.resolve({status:200,body:url});
+}
+async function pixHits(q,lang){
+ var r=await http("GET","https://pixabay.com/api/?key="+encodeURIComponent(S.pixKey)+"&q="+encodeURIComponent(q)+"&image_type=photo&category=food&safesearch=true&per_page=12&lang="+(lang||"en"),{},"");
+ if(r.status===400&&/key/i.test(r.body)){if(!pixWarned){pixWarned=true;toast("A Pixabay nem fogadta el a kulcsot. Ellenőrizd a ⚙️ Beállításokban, hogy pontosan a teljes kulcs van-e bemásolva.",6000);}return null;}
+ if(r.status!==200){imgErr("A Pixabay nem adott képet (kód: "+r.status+"). Írd meg ezt a kódot Claude-nak.");return null;}
+ try{return (JSON.parse(r.body).hits||[]).filter(function(h){return h.webformatURL;});}catch(e){return null;}
+}
+async function stockPhoto(name,en,next){
+ if(!name) return null;var k=norm(name);var cur=S.img[k];
+ if(cur&&cur.px&&!next){var u=await ownGet("px:"+k);if(u) return {u:u,by:cur.by,l:cur.l,site:cur.site};
+  if(cur.url&&Date.now()-cur.at<20*3600e3) return {u:cur.url,by:cur.by,l:cur.l,k:k};}
+ if(!S.pixKey) return null;
+ if(imgWait[k]) return imgWait[k];
+ imgWait[k]=(async function(){
+  var base=String(en||name).trim(),w=base.split(/\s+/),qs=[base];
+  if(w.length>2) qs.push(w.slice(-2).join(" "));
+  if(w.length>1) qs.push(w[w.length-1]);
+  var hits=null,q=null;
+  for(var i=0;i<qs.length;i++){hits=await pixHits(qs[i],en?"en":"hu");if(hits===null) return null;if(hits.length){q=qs[i];break;}}
+  if(!hits||!hits.length) return null;
+  var idx=(next&&cur&&cur.q===q)?((cur.i||0)+1)%hits.length:0;
+  var h=hits[idx];
+  var r=await fetchImg(h.webformatURL);
+  if(r.status===200&&r.body&&r.body.indexOf("data:image")===0){
+   try{await ownPut("px:"+k,r.body);}catch(e){}
+   ownMem["px:"+k]=r.body;
+   S.img[k]={px:1,by:h.user,l:h.pageURL,i:idx,q:q};ownDel("orig:px:"+k);save();
+   return {u:r.body,by:h.user,l:h.pageURL};
+  }
+  delete ownMem["px:"+k];
+  S.img[k]={px:1,by:h.user,l:h.pageURL,i:idx,q:q,url:h.webformatURL,at:Date.now()};save();
+  return {u:h.webformatURL,by:h.user,l:h.pageURL,k:k};
+ })();
+ var res=await imgWait[k];delete imgWait[k];return res;
+}
+var dbp=null;
+function db(){if(!dbp)dbp=new Promise(function(res,rej){var r=indexedDB.open("fozzunk",1);r.onupgradeneeded=function(){r.result.createObjectStore("photos");};r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});return dbp;}
+async function ownPut(k,v){var d=await db();return new Promise(function(res,rej){var t=d.transaction("photos","readwrite");t.objectStore("photos").put(v,k);t.oncomplete=function(){res();};t.onerror=function(){rej(t.error);};});}
+var ownMem={};
+async function ownGet(k){if(ownMem[k])return ownMem[k];try{var d=await db();var v=await new Promise(function(res){var q=d.transaction("photos").objectStore("photos").get(k);q.onsuccess=function(){res(q.result||null);};q.onerror=function(){res(null);};});if(v)ownMem[k]=v;return v;}catch(e){return null;}}
+
+function phHTML(name,en,cls){return '<div class="ph '+(cls||"")+'" data-own="'+esc(keyOf(name))+'" data-n="'+esc(name)+'" data-q="'+esc(en||"")+'">🍲</div>';}
+function hydrate(){
+ document.querySelectorAll(".ph[data-q]").forEach(function(el){
+  var own=el.getAttribute("data-own"),q=el.getAttribute("data-q"),nm=el.getAttribute("data-n");
+  el.removeAttribute("data-q");
+  (async function(){
+   var src=null,cred=null;
+   if(own&&S.own[own]) src=await ownGet(own);
+   if(!src){var p=await stockPhoto(nm,q);if(p){src=p.u;cred=p;}}
+   if(src&&el.isConnected){el.innerHTML='<img alt="" src="'+esc(src)+'">';
+    var im=S.img[norm(nm)];if(im&&im.vf&&!im.crop&&!S.own[own])el.firstChild.style.objectPosition="center "+(im.vi?"50%":im.pos==="top"?"22%":im.pos==="bottom"?"78%":"50%");
+    if(cred&&cred.k){var ck=cred.k;el.firstChild.onerror=function(){delete S.img[ck];save();el.innerHTML="🍲";imgErr("A képet nem sikerült betölteni a Pixabayről. Ellenőrizd a netet.");};}
+    var c=el.parentNode&&el.parentNode.parentNode&&el.parentNode.parentNode.querySelector(".credit[data-for='"+own+"']");
+    if(c) c.innerHTML=S.own[own]?"Saját fotó":cred?'Fotó: <a href="#" data-act="url" data-u="'+esc(cred.l)+'">'+esc(cred.by)+(cred.site===""?"":" / "+esc(cred.site||"Pixabay"))+"</a>":"";}
+  })();
+ });
+}
+function shrink(src,max){return new Promise(function(res,rej){var im=new Image();im.onload=function(){var s=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));var c=document.createElement("canvas");c.width=Math.round(im.naturalWidth*s);c.height=Math.round(im.naturalHeight*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",0.82));};im.onerror=rej;im.src=src;});}
+function pickFiles(multi,cb,max){
+ var inp=document.createElement("input");inp.type="file";inp.accept="image/*";if(multi)inp.multiple=true;
+ inp.onchange=async function(){var out=[];for(var i=0;i<inp.files.length&&i<6;i++){try{var u=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(inp.files[i]);});out.push(await shrink(u,max||1280));}catch(e){}}if(out.length)cb(out);};
+ inp.click();
+}
+var camStream=null,camCb=null;
+async function openCamera(cb){
+ camCb=cb;stack.push({t:"camera"});render();
+ try{
+  camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false});
+  var v=$("#camv");if(!v){stopCam();return;}v.srcObject=camStream;await v.play();
+ }catch(e){closeCamera();toast("A kamera nem indult el. Válassz képet a galériából.");pickFiles(true,cb);}
+}
+function stopCam(){if(camStream){camStream.getTracks().forEach(function(t){t.stop();});camStream=null;}}
+function closeCamera(){stopCam();if(stack.length&&stack[stack.length-1].t==="camera")stack.pop();render();}
+function snap(){var v=$("#camv");if(!v||!v.videoWidth)return;var s=Math.min(1,1280/Math.max(v.videoWidth,v.videoHeight));var c=document.createElement("canvas");c.width=Math.round(v.videoWidth*s);c.height=Math.round(v.videoHeight*s);c.getContext("2d").drawImage(v,0,0,c.width,c.height);var u=c.toDataURL("image/jpeg",0.82);var cb=camCb;closeCamera();if(cb)cb([u]);}
+
+/* ---------- speech, timers ---------- */
+function speak(t){if(NATIVE){if(AndroidBridge.ttsReady())AndroidBridge.speak(t);else toast("A magyar felolvasó hang nincs telepítve. Telepítsd a telefon beállításaiban (Szövegfelolvasás).");}else if(window.speechSynthesis){speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="hu-HU";speechSynthesis.speak(u);}}
+function stopSpeak(){if(NATIVE)AndroidBridge.stopSpeak();else if(window.speechSynthesis)speechSynthesis.cancel();}
+var timer=null,tick=null;
+function fmtT(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
+function timerLeft(){if(!timer)return 0;return timer.run?(timer.end-Date.now())/1000:timer.left;}
+function startTick(){clearInterval(tick);tick=setInterval(function(){if(!timer)return;var l=timerLeft();var el=$("#tdisp");if(el)el.textContent=fmtT(l);
+ if(timer.run&&l<=0){timer.run=false;timer.left=0;timer.done=true;clearInterval(tick);ring();render();}},300);}
+function ring(){if(NATIVE)AndroidBridge.vibrate(1200);else if(navigator.vibrate)navigator.vibrate([400,200,400]);
+ try{var ac=new (window.AudioContext||window.webkitAudioContext)();[0,0.35,0.7].forEach(function(t){var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(0.25,ac.currentTime+t);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+t+0.3);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+0.3);});}catch(e){}
+ speak("Lejárt az időzítő.");toast("⏰ Lejárt az időzítő!",6000);}
+
+/* ---------- formatting ---------- */
+function fmtQ(q,servBase,serv,unit){
+ if(q==null||q==="") return "";
+ var v=Number(q)*serv/servBase;if(!isFinite(v)) return String(q);
+ if(v>=100&&/^(g|ml)$/.test(unit)) v=Math.round(v/10)*10;
+ else if(v>=10) v=Math.round(v);
+ else if(/^(db|gerezd|csokor)$/.test(unit)) v=Math.max(0.5,Math.round(v*2)/2);
+ else v=Math.round(v*10)/10;
+ return String(v).replace(".",",");
+}
+function inPantry(name){var n=norm(name);if(/^(so|bors|viz|olaj|cukor|liszt)\b/.test(n))return true;var first=n.split(/\s+/).pop();return S.pantry.some(function(p){var pn=norm(p.name);return pn.indexOf(first)>=0||n.indexOf(pn)>=0;});}
+function rateEmoji(r){return r>0.3?"👍":r<-0.3?"👎":"😐";}
+
+/* ---------- views ---------- */
+function dishCard(it,extra){
+ return '<button class="dish" data-act="open" data-name="'+esc(it.name)+'" data-en="'+esc(it.nameEn||"")+'">'+phHTML(it.name,it.nameEn)+
+  '<div class="body"><h3>'+esc(it.name)+'</h3><div class="meta">'+(it.kcal?'<span class="kcal">'+Math.round(it.kcal)+' kcal / adag</span>':"")+(it.timeMin?"<span>⏱ "+Math.round(it.timeMin)+" perc</span>":"")+(extra||"")+'</div>'+
+  (it.why?'<div class="why">'+esc(it.why)+"</div>":"")+
+  (it.uses&&it.uses.length?'<div class="tags"><b>Van itthon:</b> '+esc(it.uses.join(", "))+"</div>":"")+
+  (it.missing&&it.missing.length?'<div class="tags"><i>Hiányzik:</i> '+esc(it.missing.join(", "))+"</div>":"")+"</div></button>";
+}
+function loadingHTML(t){return '<div class="loading"><div class="pot"></div><span>'+esc(t)+"</span></div>";}
+
+function vSetup(){
+ return '<div class="setup"><div class="hero2"><h1>Főzzünk!</h1><p style="margin:8px 0 0;font-size:17px">Megtanulja, mit szerettek, és ehhez ajánl ételt, receptet, heti menüt. A hűtő fotójából is ötletel.</p></div>'+settingsFields()+
+ '<div class="field"><label for="f-seed">Mit szoktatok enni?</label><textarea id="f-seed" rows="4" placeholder="pl. paprikás csirke, rakott krumpli, bolognai, lecsó, húsleves"></textarea><div class="hint">Vesszővel vagy soronként. Ebből indul az ajánló, később a naplóból tanul.</div></div>'+
+ '<button class="btn wide" data-act="finishSetup">Kezdjük</button></div>';
+}
+function settingsFields(){
+ return '<div class="field"><label for="f-house">Hányan esztek általában?</label><input id="f-house" type="number" min="1" max="12" value="'+esc(S.household)+'"></div>'+
+ '<div class="field"><label for="f-people">Kik esztek? (nevek)</label><input id="f-people" value="'+esc(S.people)+'" placeholder="pl. Patrik, Anna"><div class="hint">Főzés után mindenki külön értékelhet.</div></div>'+
+ '<div class="field"><label for="f-avoid">Ki mit nem eszik, allergia</label><textarea id="f-avoid" rows="2" placeholder="pl. Anna nem eszik gombát, laktózérzékenység">'+esc(S.avoid)+'</textarea></div>'+
+ '<div class="field"><label class="check"><input type="checkbox" id="f-dogs"'+(S.dogs?" checked":"")+'> Vannak kutyáink (jelzi, melyik maradék adható nekik)</label></div>'+
+ '<div class="field"><label class="check"><input type="checkbox" id="f-read"'+(S.readAloud?" checked":"")+'> Főzéskor a lépések automatikus felolvasása</label></div>'+
+ '<div class="field"><label for="f-okey">OpenAI API-kulcs</label><input id="f-okey" type="password" autocomplete="off" value="'+esc(S.openaiKey)+'" placeholder="sk-…"><div class="hint">Ugyanaz a kulcs jó, amit a Beszélj!-ben használsz (platform.openai.com/api-keys).</div></div>'+
+ '<div class="field"><label for="f-pix">Pixabay API-kulcs (ételfotókhoz)</label><input id="f-pix" type="password" autocomplete="off" value="'+esc(S.pixKey||"")+'" placeholder="ingyenes"><div class="hint">Regisztrálj ingyen a pixabay.com oldalon, majd bejelentkezve nyisd meg a pixabay.com/api/docs oldalt: a „Parameters” résznél, a key sorban ott a kulcsod. Másold be ide.</div></div>';
+}
+function readSettings(){
+ S.household=Math.max(1,Math.min(12,parseInt($("#f-house").value,10)||2));
+ S.people=$("#f-people").value.trim();S.avoid=$("#f-avoid").value.trim();
+ S.dogs=$("#f-dogs").checked;S.readAloud=$("#f-read").checked;
+ S.openaiKey=$("#f-okey").value.trim();var uu=$("#f-upd");if(uu)S.updUrl=normUpd(uu.value.trim());var np=$("#f-pix").value.trim();if(np!==(S.pixKey||"")){S.pixKey=np;pixWarned=false;}
+}
+function vSettings(){
+ return '<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button></div><main style="padding-top:0"><h1 style="margin-bottom:16px">Beállítások</h1>'+settingsFields()+
+ '<button class="btn wide" data-act="saveSettings">Mentés</button>'+vUpdSection()+
+ '<div class="sec" style="margin-top:30px"><h2>Adatok</h2><p class="hint">'+S.log.length+" napló bejegyzés, "+Object.keys(S.recipes).length+' recept. Minden adat csak ezen a telefonon van.</p><button class="btn ghost" data-act="wipe">Minden adat törlése</button></div></main>';
+}
+
+function vShell(){
+ var titles={home:"Mit főzzünk?",fridge:"Hűtő",plan:"Heti menü",shop:"Bevásárlólista",book:"Receptek"};
+ var body=tab==="home"?vHome():tab==="fridge"?vFridge():tab==="plan"?vPlan():tab==="shop"?vShop():vBook();
+ var nav=[["home","🍲","Ajánló"],["fridge","🧊","Hűtő"],["plan","📅","Menü"],["shop","🛒","Lista"],["book","📖","Receptek"]];
+ var cnt=S.shop.filter(function(x){return !x.done;}).length;
+ return '<header class="top"><div class="brand">'+titles[tab]+'</div><button class="iconbtn" data-act="settings" aria-label="Beállítások">⚙️</button></header><main>'+body+'</main><nav class="nav">'+
+  nav.map(function(n){return '<button class="'+(tab===n[0]?"on":"")+'" data-act="tab" data-t="'+n[0]+'"><span>'+n[1]+"</span>"+n[2]+(n[0]==="shop"&&cnt?" ("+cnt+")":"")+"</button>";}).join("")+"</nav>";
+}
+function topDishes(){var m={};S.log.forEach(function(e){var k=norm(e.name);if(!m[k])m[k]={name:e.name,n:0,s:0};m[k].n++;m[k].s+=e.rating||0;});return Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return (b.n+b.s)-(a.n+a.s);});}
+function vHome(){
+ var fav=topDishes().filter(function(x){return x.s>=0;}).slice(0,8);
+ var h='<section class="sec"><h2>Mit ettetek ma?</h2><p class="hint">Minél többet írsz be, annál jobban eltalálja, mit szerettek.</p><div class="row"><input id="logIn" placeholder="pl. töltött paprika" enterkeyhint="done"><button class="btn" data-act="logAdd">Mentés</button></div>'+
+ (fav.length?'<div class="chips" style="margin-top:10px">'+fav.map(function(f){return '<button class="chip" data-act="logQuick" data-n="'+esc(f.name)+'">+ '+esc(f.name)+"</button>";}).join("")+"</div>":"")+"</section>";
+ h+='<section class="sec"><h2>Ötletek nektek</h2><div class="chips" style="margin:6px 0 14px">'+Object.keys(MODES).map(function(k){return '<button class="chip'+(S.mode===k?" on":"")+'" data-act="mode" data-m="'+k+'">'+MODES[k][0]+"</button>";}).join("")+"</div>";
+ if(busy.sugg) h+=loadingHTML("Ételeket válogatok a szokásaitok alapján…");
+ else{
+  h+='<button class="btn wide" data-act="suggest">'+(S.sugg?"Új ötletek":"Ajánlj 5 ételt")+"</button>";
+  if(S.sugg&&S.sugg.items.length) h+='<div style="margin-top:16px">'+pixHint()+S.sugg.items.map(function(i){return dishCard(i);}).join("")+"</div>";
+ }
+ return h+"</section>";
+}
+function vFridge(){
+ var h='<section class="sec"><h2>Fotózd le, mi van itthon</h2><p class="hint">Több fotó is mehet: hűtő, ajtó, kamra polcai. Az AI felírja, amit lát, és ötletel belőle.</p><div class="row" style="margin-bottom:12px"><button class="btn" data-act="fridgeCam">📷 Fotózás</button><button class="btn ghost" data-act="fridgeGal">🖼 Galériából</button></div>';
+ if(fridgePhotos.length) h+='<div class="thumbs">'+fridgePhotos.map(function(u,i){return '<div class="thumb"><img alt="" src="'+u+'"><button data-act="rmPhoto" data-i="'+i+'" aria-label="Törlés">✕</button></div>';}).join("")+"</div>";
+ if(busy.fridge) h+=loadingHTML("Nézem, mi van a hűtőben…");
+ else if(fridgePhotos.length) h+='<button class="btn wide" style="margin-top:12px" data-act="analyze">Mi van rajtuk? ('+fridgePhotos.length+" fotó)</button>";
+ h+="</section>";
+ h+='<section class="sec"><h2>Itthon van</h2><div class="panel">'+(S.pantry.length?'<ul class="list">'+S.pantry.slice().sort(function(a,b){return (b.per?1:0)-(a.per?1:0);}).map(function(p){return '<li><div class="grow">'+esc(p.name)+"</div>"+(p.per?'<span class="tag">hamar romlik</span>':"")+'<button class="x" data-act="rmPantry" data-id="'+p.id+'" aria-label="Törlés">✕</button></li>';}).join("")+"</ul>":'<div class="empty"><b>🧊</b>Még üres. Fotózd le a hűtőt, vagy írd be lent, mi van benne.</div>')+
+ '<div class="row" style="margin-top:10px"><input id="pIn" placeholder="pl. 6 tojás"><button class="btn sm" data-act="addPantry">Hozzáad</button></div></div>'+
+ (S.pantry.length?'<div class="row" style="margin-top:10px"><button class="btn wide" data-act="fridgeIdeas"'+(busy.fridge?" disabled":"")+'>Mit főzzek ebből?</button></div><button class="btn ghost sm" style="margin-top:10px" data-act="clearPantry">Lista ürítése</button>':"")+"</section>";
+ if(S.fsugg&&S.fsugg.items.length&&!busy.fridge) h+='<section class="sec"><h2>Ebből főzhetsz</h2>'+S.fsugg.items.map(function(i){return dishCard(i);}).join("")+"</section>";
+ return h;
+}
+function vPlan(){
+ ensurePlan();var P=S.plan,filled=P.slots.filter(Boolean).length;
+ var h='<section class="sec"><p class="hint">Koppints egy napra, és válaszd ki az ételt a beírt kajáitok közül, vagy írj be újat. Az üres napokat az AI is kitöltheti.</p><div class="chips">'+
+  [3,5,7].map(function(n){return '<button class="chip'+(P.slots.length===n?" on":"")+'" data-act="planLen" data-n="'+n+'">'+n+" nap</button>";}).join("")+'<button class="chip" data-act="planNew">Új menü</button></div></section>';
+ h+='<section class="sec">'+P.slots.map(function(x,i){
+  var lab='<div class="row" style="justify-content:space-between;margin:4px 4px 6px"><b style="color:var(--rim)">'+esc(dayLabel(P.start,i))+"</b>"+(x?'<div class="row"><button class="btn ghost sm" data-act="pickDay" data-i="'+i+'">Csere</button><button class="x" data-act="clearDay" data-i="'+i+'" aria-label="Törlés">✕</button></div>':"")+"</div>";
+  if(busy.plan&&!x&&(busy.planDay==null||busy.planDay===i)) return lab+'<div class="panel" style="margin-bottom:14px">'+loadingHTML("Választok…")+"</div>";
+  return lab+(x?dishCard(x):'<button class="panel" style="width:100%;border-style:dashed;margin-bottom:14px;color:var(--mute);font-weight:700" data-act="pickDay" data-i="'+i+'">+ Válassz ételt</button>');
+ }).join("")+"</section>";
+ if(filled<P.slots.length&&!busy.plan) h+='<button class="btn ghost wide" style="margin-bottom:12px" data-act="planFill">Üres napok kitöltése AI-val ('+(P.slots.length-filled)+")</button>";
+ if(filled){
+  if(busy.pshop) h+=loadingHTML("Összeírom, mit kell venni…");
+  else if(!P.shopping.length) h+='<button class="btn wide" data-act="planShopGen">Bevásárlólista a menühöz</button>';
+  else h+='<section class="sec" style="margin-top:8px"><h2>Ezeket kell megvenni</h2><div class="panel"><ul class="list">'+P.shopping.map(function(s){return '<li><div class="grow">'+esc(s.name)+'</div><span class="small">'+esc(s.qty||"")+"</span></li>";}).join("")+'</ul></div><button class="btn wide" style="margin-top:12px" data-act="planShop">Mind a bevásárlólistára</button><button class="btn ghost sm" style="margin-top:10px" data-act="planShopGen">Újraszámolás</button></section>';
+ }
+ return h;
+}
+function vPick(top){
+ ensurePlan();var q=top.q||"";
+ var all=knownDishes(),list=all.filter(function(d){return (!q||norm(d.name).indexOf(norm(q))>=0)&&(!top.f||(d.r&&recFolders(d.r).indexOf(top.f)>=0));});
+ var usedF=S.folders.filter(function(f){return folderCount(f.id)>0;});
+ var exact=q.trim()&&all.some(function(d){return norm(d.name)===norm(q.trim());});
+ var h='<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button></div><main style="padding-top:0"><h1>'+esc(dayLabel(S.plan.start,top.i))+'</h1><p class="hint">Mit esztek ezen a napon?</p>'+
+  '<input id="pq" placeholder="Keresés vagy új étel neve" value="'+esc(q)+'" enterkeyhint="done">'+
+  (usedF.length?'<div class="chips" style="margin-top:10px"><button class="chip'+(!top.f?" on":"")+'" data-act="pickF" data-id="">Mind</button>'+usedF.map(function(f){return '<button class="chip'+(top.f===f.id?" on":"")+'" data-act="pickF" data-id="'+f.id+'">'+f.e+" "+esc(f.n)+"</button>";}).join("")+"</div>":"");
+ if(q.trim()&&!exact) h+='<button class="btn wide" style="margin-top:10px" data-act="pickFree">+ „'+esc(q.trim())+'” erre a napra</button>';
+ h+='<div class="row" style="margin:12px 0 18px"><button class="btn ghost" style="flex:1" data-act="pickAI">🎲 Döntsön az AI</button></div>';
+ h+=list.length?'<div class="panel"><ul class="list">'+list.map(function(d){var r=d.r;return '<li data-act="pickSet" data-name="'+esc(d.name)+'"><div class="grow"><b>'+(r&&r.fav?"❤️ ":"")+esc(d.name)+'</b><div class="small">'+[d.n?d.n+"× ettétek":"",r&&r.kcal?Math.round(r.kcal)+" kcal / adag":"",d.s<0?"nem ízlett":""].filter(Boolean).join(", ")+'</div></div><span class="small">›</span></li>';}).join("")+"</ul></div>"
+  :'<div class="empty"><b>🍽</b>'+(q?"Nincs ilyen a beírt ételeitek között. Add hozzá fent.":"Még nincs beírt ételetek. Az Ajánló fülön írd be, mit szoktatok enni, vagy írd be fent.")+"</div>";
+ return h+"</main>";
+}
+
+function vShop(){
+ var h='<section class="sec"><div class="row"><input id="sIn" placeholder="pl. 1 l tej"><button class="btn" data-act="addShop">Hozzáad</button></div></section>';
+ if(!S.shop.length) return h+'<div class="empty"><b>🛒</b>Üres a lista. Egy recept hiányzó hozzávalói vagy a heti menü egy gombbal ide kerülnek.</div>';
+ h+='<div class="panel"><ul class="list">'+S.shop.map(function(s){return '<li class="'+(s.done?"done":"")+'"><button class="chk'+(s.done?" on":"")+'" data-act="tick" data-id="'+s.id+'" aria-label="Kipipálás">'+(s.done?"✓":"")+'</button><div class="grow" data-act="tick" data-id="'+s.id+'">'+esc(s.name)+(s.qty?' <span class="small">'+esc(s.qty)+"</span>":"")+'</div><button class="x" data-act="rmShop" data-id="'+s.id+'" aria-label="Törlés">✕</button></li>';}).join("")+"</ul></div>";
+ var dn=S.shop.filter(function(s){return s.done;}).length;
+ h+='<div style="display:grid;gap:10px;margin-top:14px">'+(dn?'<button class="btn" data-act="toPantry">Megvettem: '+dn+' tétel a hűtőbe</button><button class="btn ghost" data-act="clearDone">Kipipáltak törlése</button>':"")+(NATIVE?'<button class="btn ghost" data-act="shareShop">Lista megosztása</button>':"")+"</div>";
+ return h;
+}
+function vBook(){
+ var q=window._bq||"";
+ var h='<section class="sec"><input id="bq" placeholder="Keresés a receptek között" value="'+esc(q)+'"></section>';
+ if(q){
+  var rs=Object.keys(S.recipes).map(function(k){return S.recipes[k];}).filter(function(r){return norm(r.name).indexOf(norm(q))>=0;});
+  return h+'<section class="sec">'+(rs.length?recipeRows(rs):'<div class="empty">Nincs ilyen recept.</div>')+"</section>";
+ }
+ h+='<section class="sec"><button class="btn wide" data-act="impOpen">🎬 Recept videóból</button></section><section class="sec"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h2>Mappák</h2><button class="btn ghost sm" data-act="fEdit">'+(window._fedit?"Kész":"Szerkesztés")+"</button></div>";
+ if(window._fedit){
+  h+='<div class="panel"><ul class="list">'+S.folders.map(function(f){return '<li data-act="fOpen" data-id="'+f.id+'"><div class="grow">'+f.e+" "+esc(f.n)+' <span class="small">('+folderCount(f.id)+')</span></div><button class="btn ghost sm" data-act="fRename" data-id="'+f.id+'">Átnevezés</button><button class="x" data-act="fDelete" data-id="'+f.id+'" aria-label="Mappa törlése">🗑</button></li>';}).join("")+
+   '</ul></div><button class="btn ghost wide" style="margin-top:10px" data-act="fNew">+ Új mappa</button><p class="hint">Mappa törlésekor a benne lévő receptek megmaradnak. Receptet a recept oldalán, vagy egy mappát megnyitva a 🗑 gombbal törölhetsz.</p></section>';
+  return h;
+ }
+ h+='<div class="tiles">';
+ var tile=function(id,e,n){return '<button class="tile" data-act="fOpen" data-id="'+id+'"><span class="te">'+e+'</span><b>'+esc(n)+'</b><span class="small">'+folderCount(id)+" recept</span></button>";};
+ h+=tile("_all","📚","Összes")+S.folders.map(function(f){return tile(f.id,f.e,f.n);}).join("");
+ var none=folderCount("_none");if(none)h+=tile("_none","📂","Mappa nélkül");
+ h+='<button class="tile add" data-act="fNew"><span class="te">＋</span><b>Új mappa</b></button></div>';
+ if(none&&Object.keys(S.recipes).length) h+=busy.sort?loadingHTML("Mappákba rendezem a recepteket…"):'<button class="btn ghost wide" style="margin-top:12px" data-act="autoSort">Rendezd mappákba AI-val ('+none+" recept)</button>";
+ h+="</section>";
+ var top=topDishes().slice(0,10);
+ if(top.length) h+='<section class="sec"><h2>Amit a legtöbbször esztek</h2><div class="chips">'+top.map(function(t){return '<button class="chip" data-act="open" data-name="'+esc(t.name)+'" data-en="">'+esc(t.name)+" ×"+t.n+"</button>";}).join("")+"</div></section>";
+ var log=S.log.filter(function(e){return e.date;}).slice().sort(function(a,b){return a.date<b.date?1:-1;}).slice(0,30);
+ h+='<section class="sec"><h2>Napló</h2>'+(log.length?'<div class="panel"><ul class="list log">'+log.map(function(e){return '<li><span class="d">'+esc(e.date.slice(5).replace("-","."))+'.</span><div class="grow">'+esc(e.name)+"</div>"+(e.rated?"<span>"+rateEmoji(e.rating)+"</span>":"")+'<button class="x" data-act="rmLog" data-id="'+e.id+'" aria-label="Törlés">✕</button></li>';}).join("")+"</ul></div>":'<p class="hint">Az Ajánló fülön írd be, mit ettetek, vagy főzz egy receptet.</p>')+"</section>";
+ return h;
+}
+
+function vRecipe(top){
+ var r=S.recipes[top.k];
+ if(!r) return '<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button></div><main>'+phHTML(top.name,top.en)+'<h1 style="margin-top:16px">'+esc(top.name)+"</h1>"+loadingHTML("Írom a receptet…")+"</main>";
+ var serv=top.serv||r.servings||S.household,base=r.servings||serv;
+ var miss=r.ingredients.filter(function(i){return !inPantry(i.name);});
+ var h='<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button><button class="iconbtn" data-act="fav" aria-label="Kedvenc">'+(r.fav?"❤️":"🤍")+'</button></div>'+
+ '<div class="hero">'+phHTML(r.name,r.nameEn)+'</div><div class="row" style="justify-content:space-between;padding-right:16px"><div class="credit" data-for="'+esc(r.key)+'"></div>'+'<div class="row" style="margin-top:6px">'+((S.own[r.key]||S.img[norm(r.name)])?'<button class="btn ghost sm" data-act="cropOpen">✂️ Igazítás</button>':"")+((S.pixKey||vfCount(r)>1)&&!S.own[r.key]?'<button class="btn ghost sm" data-act="nextImg">Másik kép</button>':"")+"</div>"+'</div>'+
+ '<div class="rhead">'+(busy["r"+top.k]?loadingHTML("Írom az új receptet…"):"")+'<h1>'+esc(r.name)+'</h1><button class="chip" style="margin-top:8px" data-act="rFold">📁 '+(recFolders(r).length?recFolders(r).map(function(id){var f=folderById(id);return f.e+" "+esc(f.n);}).join(", "):"Mappába tétel")+'</button><div class="meta"><span>⏱ '+Math.round(r.timeMin||0)+" perc</span>"+(r.difficulty?"<span>"+esc(r.difficulty)+"</span>":"")+"</div>"+
+ '<div class="macros"><div><b>'+Math.round(r.kcal||0)+"</b>kcal / adag</div><div><b>"+Math.round(r.protein||0)+" g</b>fehérje</div><div><b>"+Math.round(r.carbs||0)+" g</b>szénhidrát</div><div><b>"+Math.round(r.fat||0)+' g</b>zsír</div></div><p class="small" style="margin:0">Becsült értékek. Összesen '+Math.round((r.kcal||0)*serv)+" kcal "+serv+" adagra.</p>"+(r.source&&(r.source.url||r.source.site)?'<p class="small" style="margin:6px 0 0">Forrás: '+(r.source.url?'<a href="#" data-act="url" data-u="'+esc(r.source.url)+'">':"")+esc((r.source.site||"videó")+(r.source.author?" – "+r.source.author:""))+(r.source.url?"</a>":"")+(r.source.fromVideo?"":" (a videóban nem volt teljes recept, az AI kiegészítette)")+"</p>":"")+"</div>";
+ h+='<main style="padding-top:14px"><section class="sec"><div class="row" style="justify-content:space-between;margin-bottom:8px"><h2>Hozzávalók</h2><div class="stepper"><button data-act="serv" data-d="-1" aria-label="Kevesebb adag">−</button><b>'+serv+' adag</b><button data-act="serv" data-d="1" aria-label="Több adag">+</button></div></div>'+
+ '<div class="panel"><ul class="list ing">'+r.ingredients.map(function(i){var have=inPantry(i.name);var q=fmtQ(i.qty,base,serv,i.unit||"");return '<li><span class="'+(have?"have":"")+'" style="width:18px">'+(have?"✓":"")+'</span><div class="grow">'+esc(i.name)+'</div><span class="q">'+esc(q?q+" "+(i.unit||""):"")+"</span></li>";}).join("")+"</ul></div>"+
+ (miss.length?'<button class="btn ghost wide" style="margin-top:10px" data-act="missShop">Hiányzók a listára ('+miss.length+")</button>":"")+(S.pantry.length?'<p class="small" style="margin:6px 4px 0">✓ = van itthon a hűtő listája szerint</p>':"")+"</section>";
+ h+='<section class="sec"><h2 style="margin-bottom:10px">Elkészítés</h2><ol class="steps">'+r.steps.map(function(s){return "<li>"+esc(s.text)+(s.timerMin?' <span class="small">(⏲ '+s.timerMin+" perc)</span>":"")+"</li>";}).join("")+"</ol>"+(r.tip?'<p class="hint" style="margin-top:12px">💡 '+esc(r.tip)+"</p>":"")+"</section>";
+ if(S.dogs&&r.dog&&((r.dog.safe&&r.dog.safe.length)||(r.dog.avoid&&r.dog.avoid.length))) h+='<section class="sec panel dog"><h3>🐕 A kutyáknak</h3>'+(r.dog.safe&&r.dog.safe.length?'<p style="margin:8px 0 4px"><b>Adható natúran:</b> '+esc(r.dog.safe.join(", "))+"</p>":"")+(r.dog.avoid&&r.dog.avoid.length?'<p style="margin:4px 0"><b style="color:var(--pap)">Ne kapják meg:</b> '+esc(r.dog.avoid.join(", "))+"</p>":"")+(r.dog.note?'<p class="small" style="margin:6px 0 0">'+esc(r.dog.note)+"</p>":"")+"</section>";
+ h+='<section class="sec"><div style="display:grid;gap:10px"><h3>Fotó a kész ételről</h3><div class="row"><button class="btn ghost" style="flex:1" data-act="dishCam">📷 Fotózás</button><button class="btn ghost" style="flex:1" data-act="dishGal">🖼 Galériából</button></div><button class="btn ghost" data-act="ateToday">Ma ezt ettük</button><button class="btn ghost sm" data-act="regen">Új recept ehhez az ételhez</button><button class="btn ghost sm" style="color:var(--pap)" data-act="rDel">🗑 Recept törlése</button></div></section></main>'+
+ '<div class="foot"><button class="btn" data-act="cook">Főzés indítása</button></div>';
+ return h;
+}
+function vCook(top){
+ var r=S.recipes[top.k];if(!r) return "";
+ var n=r.steps.length;
+ if(top.i>=n){
+  var ps=people();if(!ps.length)ps=["Mindenki"];
+  return '<div class="cook"><div class="bar"><h2>Kész! Jó étvágyat!</h2><button class="iconbtn" data-act="back" aria-label="Bezárás">✕</button></div><div class="stage"><h3>Hogy ízlett?</h3><div>'+
+   ps.map(function(p,pi){var v=(top.rate||{})[p];return '<div class="rate"><b>'+esc(p)+'</b><div class="opts">'+[[1,"👍"],[0,"😐"],[-1,"👎"]].map(function(o){return '<button class="'+(v===o[0]?"on":"")+'" data-act="rate" data-p="'+esc(p)+'" data-v="'+o[0]+'">'+o[1]+"</button>";}).join("")+"</div></div>";}).join("")+
+   '</div><button class="btn wide" data-act="finishCook">Mentés a naplóba</button><div class="row"><button class="btn ghost" style="flex:1" data-act="dishCam">📷 Fotó az ételről</button><button class="btn ghost" style="flex:1" data-act="dishGal">🖼 Galériából</button></div></div></div>';
+ }
+ var s=r.steps[top.i];var tl=timer&&timer.k===top.k&&timer.i===top.i;
+ var h='<div class="cook"><div class="bar"><div><b>'+esc(r.name)+'</b><div style="font-size:14px;opacity:.85">'+(top.i+1)+". lépés / "+n+'</div></div><button class="iconbtn" data-act="back" aria-label="Kilépés">✕</button></div><div class="stage"><div class="progress">'+r.steps.map(function(x,i){return '<i class="'+(i<=top.i?"on":"")+'"></i>';}).join("")+'</div><div class="steptext">'+esc(s.text)+"</div>";
+ if(s.timerMin){var l=tl?timerLeft():s.timerMin*60;
+  h+='<div class="timer'+(tl&&timer.done?" end":"")+'"><div class="t" id="tdisp">'+fmtT(l)+'</div><div class="row" style="justify-content:center;margin-top:10px;flex-wrap:wrap">'+
+  (tl&&timer.run?'<button class="btn sm" data-act="tPause">Szünet</button>':'<button class="btn sm" data-act="tStart">'+(tl&&!timer.done&&timer.left<s.timerMin*60?"Folytatás":"Indítás")+"</button>")+
+  (tl?'<button class="btn ghost sm" data-act="tReset">Újra</button>':"")+(NATIVE?'<button class="btn ghost sm" data-act="tPhone">Telefon órájába</button>':"")+"</div></div>";}
+ h+='</div><div class="ctrl"><button class="btn ghost" data-act="cstep" data-d="-1"'+(top.i===0?" disabled":"")+'>Előző</button><button class="speak" data-act="say" aria-label="Felolvasás">🔊</button><button class="btn" data-act="cstep" data-d="1">'+(top.i===n-1?"Kész":"Következő")+"</button></div></div>";
+ return h;
+}
+function vCamera(){return '<div class="cam"><video id="camv" playsinline muted autoplay></video><div class="cbar"><button class="iconbtn" data-act="camClose" aria-label="Mégse">✕</button><button class="shutter" data-act="snap" aria-label="Fotó"></button><span style="width:42px"></span></div></div>';}
+
+function render(){try{renderInner();}catch(e){console.error(e);var t=stack[stack.length-1];if(t&&t.t!=="camera"){stack.pop();try{renderInner();}catch(e2){}}toast("Hiba történt: "+(e&&e.message||e)+". Küldj róla képet Claude-nak.",8000);}}
+function renderInner(){
+ var top=stack[stack.length-1];
+ if(top&&top.t==="camera"&&$("#camv")) return;
+ var html;
+ if(!S.setup) html=vSetup();
+ else if(top&&top.t==="recipe") html=vRecipe(top);
+ else if(top&&top.t==="cook") html=vCook(top);
+ else if(top&&top.t==="camera") html=vCamera();
+ else if(top&&top.t==="settings") html=vSettings();
+ else if(top&&top.t==="pick") html=vPick(top);
+ else if(top&&top.t==="import") html=vImport(top);
+ else if(top&&top.t==="folder") html=vFolder(top);
+ else if(top&&top.t==="rfold") html=vRFold(top);
+ else if(top&&top.t==="imgpick") html=vImgPick(top);
+ else if(top&&top.t==="crop") html=vCrop(top);
+ else html=vShell();
+ var fid=document.activeElement&&document.activeElement.id,keep=fid==="bq"||fid==="pq";
+ app.innerHTML=html;hydrate();
+ if(keep){var b=$("#"+fid);if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length);}}
+ if(NATIVE) AndroidBridge.keepAwake(!!(top&&top.t==="cook"));
+}
+function scrollTop(){window.scrollTo(0,0);}
+
+/* ---------- actions ---------- */
+function openRecipe(name,en){
+ var k=keyOf(name);stack.push({t:"recipe",k:k,name:name,en:en});render();scrollTop();
+ if(!S.recipes[k]&&!busy["r"+k]) genRecipe({name:name,nameEn:en});
+}
+function addLog(name,rating,rated){
+ name=String(name||"").trim();if(!name)return;
+ S.log.push({id:uid(),name:name,date:dstr(),rating:rating||0,rated:!!rated});
+ if(S.log.length>800)S.log=S.log.slice(-800);save();
+}
+function addShop(name,qty){
+ if(!name)return false;
+ if(S.shop.some(function(s){return !s.done&&norm(s.name)===norm(name);}))return false;
+ S.shop.push({id:uid(),name:name,qty:qty||"",done:false});return true;
+}
+function stepCook(top,i){
+ top.i=i;stopSpeak();render();scrollTop();
+ var r=S.recipes[top.k];if(S.readAloud&&r&&i<r.steps.length) speak(r.steps[i].text);
+}
+
+document.addEventListener("click",function(ev){
+ var el=ev.target.closest("[data-act]");if(!el)return;
+ var a=el.getAttribute("data-act"),top=stack[stack.length-1];
+ if(el.tagName==="A")ev.preventDefault();
+ switch(a){
+ case "tab": tab=el.getAttribute("data-t");render();scrollTop();break;
+ case "settings": stack.push({t:"settings"});render();scrollTop();break;
+ case "back": goBack();break;
+ case "url": if(NATIVE)AndroidBridge.openUrl(el.getAttribute("data-u"));else window.open(el.getAttribute("data-u"),"_blank");break;
+ case "finishSetup":
+  readSettings();
+  $("#f-seed").value.split(/[,;\n]/).map(function(x){return x.trim();}).filter(Boolean).forEach(function(n){S.log.push({id:uid(),name:n,date:null,rating:0.5,rated:false});});
+  S.setup=true;save();render();
+  if(!S.openaiKey) toast("Az ajánlásokhoz add meg az OpenAI kulcsot a ⚙️ Beállításokban.",5000);
+  break;
+ case "saveSettings": readSettings();save();toast("Mentve.");goBack();break;
+ case "wipe": dialog({title:"Minden adat törlése",text:"Biztosan törlöd az összes adatot (napló, receptek, listák, kulcsok)? Ez nem vonható vissza.",ok:"Törlés",danger:true}).then(function(ok){if(!ok)return;localStorage.removeItem(LS);try{indexedDB.deleteDatabase("fozzunk");}catch(e){}location.reload();});break;
+ case "logAdd": var li=$("#logIn");if(li.value.trim()){addLog(li.value);toast("Beírtam: "+li.value.trim());li.value="";render();}break;
+ case "logQuick": addLog(el.getAttribute("data-n"));toast("Beírtam: "+el.getAttribute("data-n"));render();break;
+ case "mode": S.mode=el.getAttribute("data-m");save();render();break;
+ case "suggest": suggest();break;
+ case "open": openRecipe(el.getAttribute("data-name"),el.getAttribute("data-en"));break;
+ case "fridgeCam": openCamera(function(u){fridgePhotos=fridgePhotos.concat(u).slice(0,6);render();});break;
+ case "fridgeGal": pickFiles(true,function(u){fridgePhotos=fridgePhotos.concat(u).slice(0,6);render();});break;
+ case "rmPhoto": fridgePhotos.splice(+el.getAttribute("data-i"),1);render();break;
+ case "analyze": analyzeFridge();break;
+ case "fridgeIdeas": fridgeIdeas();break;
+ case "addPantry": var pi=$("#pIn");if(pi.value.trim()){S.pantry.push({id:uid(),name:pi.value.trim(),per:false,at:Date.now()});save();render();}break;
+ case "rmPantry": S.pantry=S.pantry.filter(function(p){return p.id!==el.getAttribute("data-id");});save();render();break;
+ case "clearPantry": dialog({title:"Hűtő lista ürítése",text:"Kiüríted a hűtő listáját?",ok:"Ürítés",danger:true}).then(function(ok){if(ok){S.pantry=[];save();render();}});break;
+ case "planLen": ensurePlan();var nl=+el.getAttribute("data-n");var sl=S.plan.slots.slice(0,nl);while(sl.length<nl)sl.push(null);S.plan.slots=sl;S.plan.shopping=[];save();render();break;
+ case "planNew": var doNew=function(){newPlan((S.plan&&S.plan.slots&&S.plan.slots.length)||7);render();};if(!S.plan||!S.plan.slots||!S.plan.slots.some(Boolean))doNew();else dialog({title:"Új menü",text:"Új menüt kezdesz mától? A mostani kiürül.",ok:"Új menü"}).then(function(ok){if(ok)doNew();});break;
+ case "pickDay": stack.push({t:"pick",i:+el.getAttribute("data-i"),q:""});render();scrollTop();break;
+ case "clearDay": S.plan.slots[+el.getAttribute("data-i")]=null;S.plan.shopping=[];save();render();break;
+ case "pickSet": S.plan.slots[top.i]=slotFrom(el.getAttribute("data-name"));S.plan.shopping=[];save();stack.pop();render();break;
+ case "pickFree": if(!top||top.t!=="pick")break;var fq=(top.q||"").trim();if(!fq)break;S.plan.slots[top.i]=slotFrom(fq);S.plan.shopping=[];save();stack.pop();render();break;
+ case "pickAI": var di=top.i;S.plan.slots[di]=null;stack.pop();render();fillPlan(di);break;
+ case "planFill": fillPlan(null);break;
+ case "planShopGen": planShopping();break;
+ case "planShop": var c=0;S.plan.shopping.forEach(function(s){if(addShop(s.name,s.qty))c++;});save();toast(c+" tétel a listára került.");render();break;
+ case "addShop": var si=$("#sIn");if(si.value.trim()){addShop(si.value.trim(),"");save();render();}break;
+ case "tick": S.shop.forEach(function(s){if(s.id===el.getAttribute("data-id"))s.done=!s.done;});save();render();break;
+ case "rmShop": S.shop=S.shop.filter(function(s){return s.id!==el.getAttribute("data-id");});save();render();break;
+ case "clearDone": S.shop=S.shop.filter(function(s){return !s.done;});save();render();break;
+ case "toPantry": var m=0;S.shop.filter(function(s){return s.done;}).forEach(function(s){if(!S.pantry.some(function(p){return norm(p.name)===norm(s.name);})){S.pantry.push({id:uid(),name:s.name,per:false,at:Date.now()});m++;}});S.shop=S.shop.filter(function(s){return !s.done;});save();toast(m+" tétel bekerült a hűtő listájába.");render();break;
+ case "shareShop": AndroidBridge.share("Bevásárlólista:\n"+S.shop.filter(function(s){return !s.done;}).map(function(s){return "- "+s.name+(s.qty?" ("+s.qty+")":"");}).join("\n"));break;
+ case "rmLog": S.log=S.log.filter(function(e){return e.id!==el.getAttribute("data-id");});save();render();break;
+ case "fav": var r=S.recipes[top.k];if(r){r.fav=!r.fav;save();render();}break;
+ case "serv": var rr=S.recipes[top.k];top.serv=Math.max(1,Math.min(20,(top.serv||rr.servings||S.household)+(+el.getAttribute("data-d"))));render();break;
+ case "missShop": var r2=S.recipes[top.k],serv=top.serv||r2.servings,c2=0;r2.ingredients.filter(function(i){return !inPantry(i.name);}).forEach(function(i){var q=fmtQ(i.qty,r2.servings||serv,serv,i.unit||"");if(addShop(i.name,q?q+" "+(i.unit||""):""))c2++;});save();toast(c2+" hozzávaló a bevásárlólistára került.");break;
+ case "ateToday": addLog(S.recipes[top.k].name);toast("Beírtam a naplóba.");break;
+ case "regen": var old=S.recipes[top.k];if(!busy["r"+top.k])genRecipe({name:old.name,nameEn:old.nameEn});break;
+ case "dishCam": case "dishGal":
+  var key=top.k;
+  var done=function(u){ownDel("orig:"+key);ownPut(key,u[0]).then(function(){ownMem[key]=u[0];S.own[key]=true;save();if(stack.length&&stack[stack.length-1].t==="imgpick")stack.pop();render();toast("Elmentettem a fotót. Mostantól ez jelenik meg az ételnél.");}).catch(function(){toast("Nem sikerült menteni a fotót.");});};
+  if(a==="dishCam") openCamera(done); else pickFiles(false,done);
+  break;
+ case "cook": stack.push({t:"cook",k:top.k,i:0,rate:{}});render();scrollTop();if(S.readAloud)speak(S.recipes[top.k].steps[0].text);break;
+ case "cstep": stepCook(top,Math.max(0,top.i+(+el.getAttribute("data-d"))));break;
+ case "say": var rs=S.recipes[top.k];if(rs&&top.i<rs.steps.length)speak(rs.steps[top.i].text);break;
+ case "tStart": var st=S.recipes[top.k].steps[top.i];
+  if(!(timer&&timer.k===top.k&&timer.i===top.i)||timer.done) timer={k:top.k,i:top.i,left:st.timerMin*60};
+  timer.run=true;timer.done=false;timer.end=Date.now()+timer.left*1000;startTick();render();break;
+ case "tPause": if(timer){timer.left=timerLeft();timer.run=false;clearInterval(tick);}render();break;
+ case "tReset": timer=null;clearInterval(tick);render();break;
+ case "tPhone": var sp=S.recipes[top.k].steps[top.i];if(!AndroidBridge.setTimer(Math.round(sp.timerMin*60),S.recipes[top.k].name))toast("A telefon órája nem fogadta az időzítőt. Használd az appbelit.");break;
+ case "rate": top.rate=top.rate||{};top.rate[el.getAttribute("data-p")]=+el.getAttribute("data-v");render();break;
+ case "finishCook":
+  var vals=Object.keys(top.rate||{}).map(function(k){return top.rate[k];});
+  var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
+  addLog(S.recipes[top.k].name,avg,vals.length>0);stack.pop();render();toast("Beírtam a naplóba. Legközelebb ehhez igazodik az ajánló.");break;
+ case "nextImg": var rn=S.recipes[top.k];
+  if(vfCount(rn)>1){stack.push({t:"imgpick",k:top.k});render();scrollTop();break;}
+  toast("Keresek egy másik képet…");stockPhoto(rn.name,rn.nameEn,true).then(function(p){if(p)render();else toast("Nem találtam másik képet ehhez az ételhez.");});break;
+ case "imgSet": var rs2=S.recipes[top.k],ik2=norm(rs2.name),ix=+el.getAttribute("data-i");
+  ownGet("vf:"+ik2).then(function(js){var arr=[];try{arr=JSON.parse(js||"[]");}catch(e){}if(!arr[ix])return;
+   ownMem["px:"+ik2]=arr[ix];ownPut("px:"+ik2,arr[ix]).catch(function(){});
+   var cur=S.img[ik2]||{px:1,by:"Kép a videóból",site:(rs2.source&&rs2.source.site)||"",l:(rs2.source&&rs2.source.url)||""};cur.vi=ix;cur.vf=arr.length;cur.pos="center";cur.crop=false;ownDel("orig:px:"+ik2);cur.px=1;delete cur.url;S.img[ik2]=cur;
+   if(S.own[rs2.key]){delete S.own[rs2.key];}
+   save();stack.pop();render();toast("Borítókép beállítva.");});break;
+ case "imgPix": var rp=S.recipes[top.k];stack.pop();render();toast("Keresek egy képet a Pixabayen…");stockPhoto(rp.name,rp.nameEn,true).then(function(p){if(p)render();else toast("Nem találtam képet a Pixabayen.");});break;
+ case "pickF": top.f=el.getAttribute("data-id")||"";render();break;
+ case "fOpen": stack.push({t:"folder",id:el.getAttribute("data-id")});render();scrollTop();break;
+ case "fNew": newFolder(top&&top.t==="rfold"?function(f){var rr=S.recipes[top.k];rr.folders=recFolders(rr).concat([f.id]);save();}:null);break;
+ case "fRename": var fr=folderById(el.getAttribute("data-id")||top.id);dialog({title:"Mappa átnevezése",input:fr.e+" "+fr.n,ok:"Mentés"}).then(function(nn){if(!nn)return;var mm=nn.match(/^(\p{Extended_Pictographic}[\uFE0F\u200D\p{Extended_Pictographic}]*)\s*(.*)$/u);if(mm&&mm[2]){fr.e=mm[1];fr.n=mm[2];}else fr.n=nn;save();render();});break;
+ case "fDelete": var fd=folderById(el.getAttribute("data-id")||top.id),inView=!el.getAttribute("data-id");dialog({title:"Mappa törlése",text:"Törlöd a(z) „"+fd.n+"” mappát? A benne lévő receptek megmaradnak.",ok:"Törlés",danger:true}).then(function(ok){if(!ok)return;S.folders=S.folders.filter(function(f){return f.id!==fd.id;});Object.keys(S.recipes).forEach(function(k){var rr=S.recipes[k];if(rr.folders)rr.folders=rr.folders.filter(function(x){return x!==fd.id;});});save();if(inView)stack.pop();render();toast("Mappa törölve.");});break;
+ case "fEdit": window._fedit=!window._fedit;render();break;
+ case "rDel": deleteRecipe(el.getAttribute("data-k")||top.k);break;
+ case "rFold": stack.push({t:"rfold",k:top.k});render();scrollTop();break;
+ case "fToggle": var rt=S.recipes[top.k],fid2=el.getAttribute("data-id"),curF=recFolders(rt);rt.folders=curF.indexOf(fid2)>=0?curF.filter(function(x){return x!==fid2;}):curF.concat([fid2]);save();render();break;
+ case "autoSort": autoSort();break;
+ case "impOpen": stack.push({t:"import",url:"",text:"",shots:[],frames:[],err:""});render();scrollTop();break;
+ case "impShots": var ti2=top;pickFiles(true,function(u){ti2.shots=ti2.shots.concat(u).slice(0,6);render();},1600);break;
+ case "impVideo": var tv=top;tv.stage="Kiolvasom a képkockákat a videóból…";busy.imp=true;render();
+  framesVia(function(id){AndroidBridge.pickVideo(id);}).then(function(fr){busy.imp=false;if(fr){tv.frames=fr;toast(fr.length+" képkockát olvastam ki. Nyomd meg a Recept készítése gombot.");}render();});break;
+ case "impFramesRm": top.frames=[];render();break;
+ case "impRm": top.shots.splice(+el.getAttribute("data-i"),1);render();break;
+ case "impGo": if(!busy.imp)importVideo(top);break;
+ case "cropOpen": cropOpen(top.k);break;
+ case "cropReset": cropReset();cropApply();break;
+ case "cropSave": cropSave();break;
+ case "updCheck": checkUpdate(true);break;
+ case "updReset": dialog({title:"Vissza a telepített verzióra",text:"Törlöm a letöltött frissítéseket, és a telepített verzió indul. Az adataid megmaradnak.",ok:"Visszaállítás"}).then(function(ok){if(ok)AndroidBridge.resetToBuiltin();});break;
+ case "camClose": closeCamera();break;
+ case "snap": snap();break;
+ }
+});
+document.addEventListener("input",function(ev){if(ev.target.id==="czoom"){cropSlider(+ev.target.value);return;}if(ev.target.id==="bq"){window._bq=ev.target.value;render();}else if(ev.target.id==="iu"||ev.target.id==="it"){var ti=stack[stack.length-1];if(ti&&ti.t==="import"){if(ev.target.id==="iu")ti.url=ev.target.value;else ti.text=ev.target.value;}}
+ else if(ev.target.id==="pq"){var t=stack[stack.length-1];if(t&&t.t==="pick"){t.q=ev.target.value;render();}}});
+document.addEventListener("keydown",function(ev){if(ev.key!=="Enter")return;var m={logIn:"logAdd",pIn:"addPantry",sIn:"addShop",pq:"pickFree"}[ev.target.id];if(m){var b=document.querySelector('[data-act="'+m+'"]');if(b)b.click();}});
+
+function goBack(){
+ var top=stack[stack.length-1];
+ if(!top){if(tab!=="home"){tab="home";render();return true;}return false;}
+ if(top.t==="camera"){closeCamera();return true;}
+ if(top.t==="cook")stopSpeak();
+ stack.pop();render();return true;
+}
+window.onAndroidBack=function(){if(dialogClose){dialogClose();return true;}if(!S.setup)return false;return goBack();};
+render();
+setTimeout(function(){window.checkShared();},300);
+if(S.setup&&S.lastVer!==APP_VER)setTimeout(function(){toast("✨ Az app frissült: "+APP_VER,6000);},600);
+if(S.lastVer!==APP_VER){S.lastVer=APP_VER;save();}
+if(NATIVE){try{AndroidBridge.bootOk();}catch(e){}
+ var ui0=updInfo();if(ui0.rolledBack)setTimeout(function(){toast("A(z) "+ui0.rolledBack+" frissítés nem indult el rendesen, visszaálltam az előző verzióra.",7000);},800);
+ if(!S.updAt||Date.now()-S.updAt>3*3600e3)setTimeout(function(){checkUpdate(false);},4000);}
+</script>
+</body>
+</html>
