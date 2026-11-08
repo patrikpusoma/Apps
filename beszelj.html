@@ -247,7 +247,7 @@ textarea{min-height:96px;resize:vertical}
 <div id="app"></div>
 <script>
 var __BOOT=(function(){
-  var OWN="2.21";
+  var OWN="2.22";
   window.__APP_VERSION=OWN;
   function cmp(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1;}return 0;}
   function verOf(h){var m=/var OWN="([0-9.]+)"/.exec(h||"");return m?m[1]:null;}
@@ -1944,6 +1944,7 @@ function vLevelPick(){
 const RU_URL="beszelj-remote-url",RU_LAST="beszelj-remote-last";
 function ruGet(k){try{return localStorage.getItem(k)||"";}catch(e){return "";}}
 function ruSet(k,v){try{v==null||v===""?localStorage.removeItem(k):localStorage.setItem(k,v);}catch(e){}}
+(function(){const u=ruGet(RU_URL);if(/\/patrikpusoma\/beszelj\//i.test(u))ruSet(RU_URL,u.replace(/\/patrikpusoma\/beszelj\//i,"/patrikpusoma/Apps/"));})();
 function ruNormalize(u){u=String(u||"").trim();const m=/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/.exec(u);return m?`https://raw.githubusercontent.com/${m[1]}/${m[2]}/${m[3]}`:u;}
 function ruPending(){const v=ruGet("beszelj-remote-ver");return v&&v!==ruGet("beszelj-remote-bad")&&__BOOT.cmp(v,APP_VERSION)>0?v:"";}
 async function ruCheck(manual){
@@ -2087,6 +2088,7 @@ if(NATIVE&&AndroidBridge.ready){try{AndroidBridge.ready();}catch(e){}}
 ruSet("beszelj-remote-ok",APP_VERSION);
 /* what's new */
 const CHANGELOG={
+ "2.22":["A frissítések mostantól az új „Apps” nevű GitHub-tárolóból érkeznek, ezt az app magától átállította"],
  "2.15":["Frissítés után az app megmutatja, mi változott (ezt látod most 🙂)","Az első távoli frissítés sikeresen megérkezett a GitHubról 🎉"],
  "2.21":["Párbeszéd-rendező: az AI egyetlen összefüggő beszélgetést ír, és ha a kérdés-válasz párokat másik értelmes sorrendbe rakod, az is helyesnek számít"],
  "2.20":["iPhone/web: a felolvasás már nem használ effekthangokat (például recsegő „nagypapa” hangot), hanem a legjobb elérhető hangot","A ⚙️ Beállításokban magad is választhatsz felolvasó hangot (webes verzió)"],
