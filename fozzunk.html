@@ -54,7 +54,9 @@ main{padding:18px 16px 110px;max-width:640px;margin:0 auto}
 .tag{font-size:12px;font-weight:700;color:var(--pap);border:1.5px solid currentColor;border-radius:999px;padding:1px 8px;white-space:nowrap}
 .chk{width:26px;height:26px;border-radius:8px;border:2.5px solid var(--rim);display:grid;place-items:center;flex:none;font-weight:800;color:var(--onrim)}
 .chk.on{background:var(--rim)}
-.done .grow{text-decoration:line-through;color:var(--mute)}
+.done .grow{color:var(--mute)}
+.done .nm,.done .grow .small{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--mute)}
+.list li.done{opacity:.6}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:2px solid var(--line);display:flex;padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px))}
 .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:var(--mute);padding:6px 0;border-radius:16px}
 .nav button span{font-size:21px;line-height:1.1}
@@ -156,7 +158,7 @@ a{color:var(--rim)}
 <div id="modal" style="display:none"></div>
 <script>
 "use strict";
-var APP_VER = "1.8.3";
+var APP_VER = "1.8.4";
 var DEFAULT_UPD = "https://raw.githubusercontent.com/patrikpusoma/Apps/main/fozzunk.html";
 var NATIVE = typeof window.AndroidBridge !== "undefined";
 var LS = "fozzunk-v1";
@@ -826,7 +828,7 @@ function vPick(top){
 function vShop(){
  var h='<section class="sec"><div class="row"><input id="sIn" placeholder="pl. 1 l tej"><button class="btn" data-act="addShop">Hozzáad</button></div></section>';
  if(!S.shop.length) return h+'<div class="empty"><b>🛒</b>Üres a lista. Egy recept hiányzó hozzávalói vagy a heti menü egy gombbal ide kerülnek.</div>';
- h+='<div class="panel"><ul class="list">'+S.shop.map(function(s){return '<li class="'+(s.done?"done":"")+'"><button class="chk'+(s.done?" on":"")+'" data-act="tick" data-id="'+s.id+'" aria-label="Kipipálás">'+(s.done?"✓":"")+'</button><div class="grow" data-act="tick" data-id="'+s.id+'">'+esc(s.name)+(s.qty?' <span class="small">'+esc(s.qty)+"</span>":"")+'</div><button class="x" data-act="rmShop" data-id="'+s.id+'" aria-label="Törlés">✕</button></li>';}).join("")+"</ul></div>";
+ h+='<div class="panel"><ul class="list">'+S.shop.slice().sort(function(a,b){return (a.done?1:0)-(b.done?1:0);}).map(function(s){return '<li class="'+(s.done?"done":"")+'"><button class="chk'+(s.done?" on":"")+'" data-act="tick" data-id="'+s.id+'" aria-label="Kipipálás">'+(s.done?"✓":"")+'</button><div class="grow" data-act="tick" data-id="'+s.id+'"><span class="nm">'+esc(s.name)+"</span>"+(s.qty?' <span class="small">'+esc(String(s.qty).replace(/(\d)\.(\d)/g,"$1,$2"))+"</span>":"")+'</div><button class="x" data-act="rmShop" data-id="'+s.id+'" aria-label="Törlés">✕</button></li>';}).join("")+"</ul></div>";
  var dn=S.shop.filter(function(s){return s.done;}).length;
  h+='<div style="display:grid;gap:10px;margin-top:14px">'+(dn?'<button class="btn" data-act="toPantry">Megvettem: '+dn+' tétel a hűtőbe</button><button class="btn ghost" data-act="clearDone">Kipipáltak törlése</button>':"")+(NATIVE?'<button class="btn ghost" data-act="shareShop">Lista megosztása</button>':"")+"</div>";
  return h;
