@@ -143,6 +143,7 @@ a{color:var(--rim)}
 .cropvp .cbg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(18px) brightness(.85)}
 .cropvp .cimg{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;pointer-events:none}
 .cropvp .cgrid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,transparent 33.2%,rgba(255,255,255,.35) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.35) 66.6%,transparent 66.8%),linear-gradient(to bottom,transparent 33.2%,rgba(255,255,255,.35) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.35) 66.6%,transparent 66.8%)}
+.ph.thumbph{width:58px;height:58px;aspect-ratio:auto;flex:none;border-radius:14px;font-size:24px}
 .setup{padding:0 18px 40px;max-width:640px;margin:0 auto}
 .setup .hero2{background:var(--rim);color:var(--onrim);margin:0 -18px 22px;padding:40px 22px 30px;border-radius:0 0 32px 32px;
  background-image:radial-gradient(rgba(255,255,255,.13) 1px,transparent 1.6px),radial-gradient(rgba(0,0,0,.08) 1px,transparent 1.6px);background-size:11px 11px,17px 17px;background-position:0 0,5px 7px}
@@ -155,7 +156,7 @@ a{color:var(--rim)}
 <div id="modal" style="display:none"></div>
 <script>
 "use strict";
-var APP_VER = "1.8.2";
+var APP_VER = "1.8.3";
 var DEFAULT_UPD = "https://raw.githubusercontent.com/patrikpusoma/Apps/main/fozzunk.html";
 var NATIVE = typeof window.AndroidBridge !== "undefined";
 var LS = "fozzunk-v1";
@@ -468,7 +469,7 @@ async function newFolder(cb){
 }
 function folderCount(id){var c=0;Object.keys(S.recipes).forEach(function(k){var r=S.recipes[k];var fs=recFolders(r);if(id==="_all"||(id==="_none"?!fs.length:fs.indexOf(id)>=0))c++;});return c;}
 function recipesIn(id){return Object.keys(S.recipes).map(function(k){return S.recipes[k];}).filter(function(r){var fs=recFolders(r);return id==="_all"||(id==="_none"?!fs.length:fs.indexOf(id)>=0);}).sort(function(a,b){return (b.fav?1:0)-(a.fav?1:0)||String(a.name||"").localeCompare(String(b.name||""),"hu");});}
-function recipeRows(rs,del){return '<div class="panel"><ul class="list">'+rs.map(function(r){return '<li data-act="open" data-name="'+esc(r.name)+'" data-en="'+esc(r.nameEn)+'"><div class="grow"><b>'+(r.fav?"❤️ ":"")+esc(r.name)+'</b><div class="small">'+Math.round(r.kcal||0)+" kcal / adag, "+Math.round(r.timeMin||0)+" perc"+(recFolders(r).length?" · "+recFolders(r).map(function(id){var f=folderById(id);return f.e+" "+esc(f.n);}).join(", "):"")+'</div></div>'+(del?'<button class="x" data-act="rDel" data-k="'+esc(r.key)+'" aria-label="Recept törlése">🗑</button>':'<span class="small">›</span>')+'</li>';}).join("")+"</ul></div>";}
+function recipeRows(rs,del){return '<div class="panel"><ul class="list">'+rs.map(function(r){return '<li data-act="open" data-name="'+esc(r.name)+'" data-en="'+esc(r.nameEn)+'">'+phHTML(r.name,r.nameEn,"thumbph")+'<div class="grow"><b>'+(r.fav?"❤️ ":"")+esc(r.name)+'</b><div class="small">'+Math.round(r.kcal||0)+" kcal / adag, "+Math.round(r.timeMin||0)+" perc"+(recFolders(r).length?" · "+recFolders(r).map(function(id){var f=folderById(id);return f.e+" "+esc(f.n);}).join(", "):"")+'</div></div>'+(del?'<button class="x" data-act="rDel" data-k="'+esc(r.key)+'" aria-label="Recept törlése">🗑</button>':'<span class="small">›</span>')+'</li>';}).join("")+"</ul></div>";}
 function vFolder(top){
  var f=top.id==="_all"?{e:"📚",n:"Összes recept"}:top.id==="_none"?{e:"📂",n:"Mappa nélkül"}:folderById(top.id);
  if(!f){stack.pop();return vShell();}
@@ -817,7 +818,7 @@ function vPick(top){
   (usedF.length?'<div class="chips" style="margin-top:10px"><button class="chip'+(!top.f?" on":"")+'" data-act="pickF" data-id="">Mind</button>'+usedF.map(function(f){return '<button class="chip'+(top.f===f.id?" on":"")+'" data-act="pickF" data-id="'+f.id+'">'+f.e+" "+esc(f.n)+"</button>";}).join("")+"</div>":"");
  if(q.trim()&&!exact) h+='<button class="btn wide" style="margin-top:10px" data-act="pickFree">+ „'+esc(q.trim())+'” erre a napra</button>';
  h+='<div class="row" style="margin:12px 0 18px"><button class="btn ghost" style="flex:1" data-act="pickAI">🎲 Döntsön az AI</button></div>';
- h+=list.length?'<div class="panel"><ul class="list">'+list.map(function(d){var r=d.r;return '<li data-act="pickSet" data-name="'+esc(d.name)+'"><div class="grow"><b>'+(r&&r.fav?"❤️ ":"")+esc(d.name)+'</b><div class="small">'+[d.n?d.n+"× ettétek":"",r&&r.kcal?Math.round(r.kcal)+" kcal / adag":"",d.s<0?"nem ízlett":""].filter(Boolean).join(", ")+'</div></div><span class="small">›</span></li>';}).join("")+"</ul></div>"
+ h+=list.length?'<div class="panel"><ul class="list">'+list.map(function(d){var r=d.r;return '<li data-act="pickSet" data-name="'+esc(d.name)+'">'+(r?phHTML(r.name,r.nameEn,"thumbph"):'<div class="ph thumbph">🍽</div>')+'<div class="grow"><b>'+(r&&r.fav?"❤️ ":"")+esc(d.name)+'</b><div class="small">'+[d.n?d.n+"× ettétek":"",r&&r.kcal?Math.round(r.kcal)+" kcal / adag":"",d.s<0?"nem ízlett":""].filter(Boolean).join(", ")+'</div></div><span class="small">›</span></li>';}).join("")+"</ul></div>"
   :'<div class="empty"><b>🍽</b>'+(q?"Nincs ilyen a beírt ételeitek között. Add hozzá fent.":"Még nincs beírt ételetek. Az Ajánló fülön írd be, mit szoktatok enni, vagy írd be fent.")+"</div>";
  return h+"</main>";
 }
