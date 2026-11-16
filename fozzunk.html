@@ -158,7 +158,7 @@ a{color:var(--rim)}
 <div id="modal" style="display:none"></div>
 <script>
 "use strict";
-var APP_VER = "1.8.6";
+var APP_VER = "1.8.7";
 var DEFAULT_UPD = "https://raw.githubusercontent.com/patrikpusoma/Apps/main/fozzunk.html";
 var NATIVE = typeof window.AndroidBridge !== "undefined";
 var LS = "fozzunk-v1";
@@ -568,7 +568,9 @@ async function checkUpdate(manual){
  if(!NATIVE||updState.checking)return;
  updState.checking=true;updState.msg="";if(manual)render();
  try{
-  var r=await http("GET",updUrl()+(updUrl().indexOf("?")<0?"?":"&")+"t="+Date.now(),{"Cache-Control":"no-cache"},"");
+  var r=null,u0=updUrl(),gm=u0.match(/^https:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)$/);
+  if(gm){r=await http("GET","https://api.github.com/repos/"+gm[1]+"/"+gm[2]+"/contents/"+gm[4]+"?ref="+gm[3]+"&t="+Date.now(),{"Accept":"application/vnd.github.raw","Cache-Control":"no-cache"},"");if(r.status!==200)r=null;}
+  if(!r)r=await http("GET",u0+(u0.indexOf("?")<0?"?":"&")+"t="+Date.now(),{"Cache-Control":"no-cache"},"");
   S.updAt=Date.now();save();
   if(r.status!==200){updState.msg=r.status===404?"A frissítési fájl nem található a megadott címen.":"Nem sikerült elérni a frissítési címet (kód: "+r.status+").";return;}
   var m=r.body.match(/var APP_VER\s*=\s*"([\d.]+)"/);
