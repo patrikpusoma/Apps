@@ -158,7 +158,7 @@ a{color:var(--rim)}
 <div id="modal" style="display:none"></div>
 <script>
 "use strict";
-var APP_VER = "1.8.7";
+var APP_VER = "1.9.0";
 var DEFAULT_UPD = "https://raw.githubusercontent.com/patrikpusoma/Apps/main/fozzunk.html";
 var NATIVE = typeof window.AndroidBridge !== "undefined";
 var LS = "fozzunk-v1";
@@ -457,6 +457,45 @@ async function autoSort(){
  }catch(e){aiErr(e);}
  busy.sort=false;render();
 }
+async function idbAll(){try{var d=await db();return await new Promise(function(res){var out={};var rq=d.transaction("photos").objectStore("photos").openCursor();rq.onsuccess=function(){var c=rq.result;if(c){out[c.key]=c.value;c.continue();}else res(out);};rq.onerror=function(){res(out);};});}catch(e){return {};}}
+async function exportData(withKeys){
+ if(!NATIVE||typeof AndroidBridge.saveBegin!=="function"){toast("Ehhez telepítsd az új Főzzünk! APK-t (1.9.0).",6000);return;}
+ busy.exp=true;render();
+ try{
+  var st=JSON.parse(JSON.stringify(S));if(!withKeys){st.openaiKey="";st.pixKey="";}
+  var json=JSON.stringify({app:"fozzunk",format:1,ver:APP_VER,at:new Date().toISOString(),state:st,photos:await idbAll()});
+  if(!AndroidBridge.saveBegin())throw 0;
+  var i=0,N=400000;
+  while(i<json.length){var e=Math.min(json.length,i+N);var cc=json.charCodeAt(e-1);if(e<json.length&&cc>=0xD800&&cc<=0xDBFF)e--;if(!AndroidBridge.saveChunk(json.slice(i,e)))throw 0;i=e;}
+  var r=await nativeCall(function(id){AndroidBridge.saveFinish(id,"fozzunk-mentes-"+dstr()+".json");});
+  toast(r.status===200?"Elmentve ("+(json.length/1048576).toFixed(1).replace(".",",")+" MB). Ezt a fájlt vidd át az új telefonra.":r.status===0?"A mentést megszakítottad.":"Nem sikerült menteni a fájlt.",6000);
+ }catch(e){toast("Nem sikerült elkészíteni a mentést.",5000);}
+ busy.exp=false;render();
+}
+function importData(){
+ if(NATIVE&&typeof AndroidBridge.saveBegin!=="function"){toast("Ehhez telepítsd az új Főzzünk! APK-t (1.9.0).",6000);return;}
+ var inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";
+ inp.onchange=async function(){
+  var f=inp.files&&inp.files[0];if(!f)return;
+  busy.imp2=true;render();
+  try{
+   var txt=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsText(f);});
+   var o=JSON.parse(txt);
+   if(o.app!=="fozzunk"||!o.state)throw {m:"Ez nem a Főzzünk! mentésfájlja."};
+   busy.imp2=false;render();
+   var nr=Object.keys(o.state.recipes||{}).length,nl=(o.state.log||[]).length;
+   var ok=await dialog({title:"Visszaállítás mentésből",text:"A mentés "+String(o.at||"").slice(0,10).replace(/-/g,". ")+". ("+nr+" recept, "+nl+" naplóbejegyzés) felülírja a Főzzünk! összes mostani adatát ezen a telefonon. Folytatod?",ok:"Visszaállítás",danger:true});
+   if(!ok)return;
+   var st=o.state;if(!st.openaiKey)st.openaiKey=S.openaiKey||"";if(!st.pixKey)st.pixKey=S.pixKey||"";
+   st.setup=true;st.lastVer=APP_VER;delete st.updAt;
+   var d=await db();
+   await new Promise(function(res,rej){var t=d.transaction("photos","readwrite"),os=t.objectStore("photos");os.clear();var ph=o.photos||{};Object.keys(ph).forEach(function(k){os.put(ph[k],k);});t.oncomplete=function(){res();};t.onerror=function(){rej(t.error);};});
+   localStorage.setItem(LS,JSON.stringify(st));
+   toast("Visszaállítva! Újratöltés…",3000);setTimeout(function(){location.reload();},900);
+  }catch(e){busy.imp2=false;render();toast((e&&e.m)||"Nem sikerült beolvasni a fájlt. Biztosan a Főzzünk! mentését választottad?",6000);}
+ };
+ inp.click();
+}
 async function ownDel(k){try{var d=await db();d.transaction("photos","readwrite").objectStore("photos").delete(k);}catch(e){}delete ownMem[k];}
 async function deleteRecipe(k){
  var r=S.recipes[k];if(!r)return;
@@ -745,7 +784,8 @@ function loadingHTML(t){return '<div class="loading"><div class="pot"></div><spa
 function vSetup(){
  return '<div class="setup"><div class="hero2"><h1>Főzzünk!</h1><p style="margin:8px 0 0;font-size:17px">Megtanulja, mit szerettek, és ehhez ajánl ételt, receptet, heti menüt. A hűtő fotójából is ötletel.</p></div>'+settingsFields()+
  '<div class="field"><label for="f-seed">Mit szoktatok enni?</label><textarea id="f-seed" rows="4" placeholder="pl. paprikás csirke, rakott krumpli, bolognai, lecsó, húsleves"></textarea><div class="hint">Vesszővel vagy soronként. Ebből indul az ajánló, később a naplóból tanul.</div></div>'+
- '<button class="btn wide" data-act="finishSetup">Kezdjük</button></div>';
+ '<button class="btn wide" data-act="finishSetup">Kezdjük</button>'+
+ '<div class="panel" style="margin-top:22px"><h3>Új telefonra költözöl?</h3><p class="hint">Ha a régi telefonon készítettél mentést, töltsd vissza, és minden megmarad: receptek, napló, mappák, listák, fotók.</p><button class="btn ghost wide" data-act="impData">📥 Visszaállítás mentésből</button></div></div>';
 }
 function settingsFields(){
  return '<div class="field"><label for="f-house">Hányan esztek általában?</label><input id="f-house" type="number" min="1" max="12" value="'+esc(S.household)+'"></div>'+
@@ -765,7 +805,13 @@ function readSettings(){
 function vSettings(){
  return '<div class="rtop"><button class="iconbtn" data-act="back" aria-label="Vissza">←</button></div><main style="padding-top:0"><h1 style="margin-bottom:16px">Beállítások</h1>'+settingsFields()+
  '<button class="btn wide" data-act="saveSettings">Mentés</button>'+vUpdSection()+
- '<div class="sec" style="margin-top:30px"><h2>Adatok</h2><p class="hint">'+S.log.length+" napló bejegyzés, "+Object.keys(S.recipes).length+' recept. Minden adat csak ezen a telefonon van.</p><button class="btn ghost" data-act="wipe">Minden adat törlése</button></div></main>';
+ '<div class="sec" style="margin-top:30px"><h2>Adatok</h2><p class="hint">'+S.log.length+" napló bejegyzés, "+Object.keys(S.recipes).length+' recept. Minden adat csak ezen a telefonon van.</p>'+
+ '<div class="panel" style="margin-bottom:14px"><h3>Költözés új telefonra</h3><p class="hint">1. Itt mentsd el az adatokat egy fájlba (például a Google Drive-ra vagy a Letöltések mappába).<br>2. Az új telefonon telepítsd a Főzzünk!-et, és indításkor válaszd a „Visszaállítás mentésből” lehetőséget, vagy itt a Beállításokban.</p>'+
+ '<label class="check" style="margin-bottom:12px"><input type="checkbox" id="f-expkeys" checked> Az API-kulcsok is kerüljenek bele</label>'+
+ (busy.exp?loadingHTML("Mentés készítése…"):'<button class="btn wide" data-act="expData">📦 Mentés fájlba</button>')+
+ (busy.imp2?loadingHTML("Mentés beolvasása…"):'<button class="btn ghost wide" style="margin-top:10px" data-act="impData">📥 Visszaállítás mentésből</button>')+
+ '<p class="small" style="margin:10px 0 0">A fájlban benne vannak a fotók is, ezért pár MB-os lehet. Ha az API-kulcsok is benne vannak, ne oszd meg mással.</p></div>'+
+ '<button class="btn ghost" data-act="wipe">Minden adat törlése</button></div></main>';
 }
 
 function vShell(){
@@ -1053,6 +1099,8 @@ document.addEventListener("click",function(ev){
  case "cropSave": cropSave();break;
  case "updCheck": checkUpdate(true);break;
  case "updReset": dialog({title:"Vissza a telepített verzióra",text:"Törlöm a letöltött frissítéseket, és a telepített verzió indul. Az adataid megmaradnak.",ok:"Visszaállítás"}).then(function(ok){if(ok)AndroidBridge.resetToBuiltin();});break;
+ case "expData": var ek=document.getElementById("f-expkeys");exportData(!ek||ek.checked);break;
+ case "impData": importData();break;
  case "camClose": closeCamera();break;
  case "snap": snap();break;
  }
