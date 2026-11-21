@@ -247,7 +247,7 @@ textarea{min-height:96px;resize:vertical}
 <div id="app"></div>
 <script>
 var __BOOT=(function(){
-  var OWN="2.25";
+  var OWN="2.26";
   window.__APP_VERSION=OWN;
   function cmp(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1;}return 0;}
   function verOf(h){var m=/var OWN="([0-9.]+)"/.exec(h||"");return m?m[1]:null;}
@@ -1855,10 +1855,14 @@ function vSettings(){
   <button class="link" data-act="reset" style="color:var(--red)">${LG().flag} ${LG().name} profil törlése</button>`;
 }
 
-function backupCopy(){
-  save();const data="BESZELJ-MENTES:"+btoa(unescape(encodeURIComponent(JSON.stringify({v:2,lang:LANG,profiles:allProfiles(),key:API_KEY}))));
+async function gz(str){const cs=new CompressionStream("gzip");const w=new Blob([new TextEncoder().encode(str)]).stream().pipeThrough(cs);const buf=new Uint8Array(await new Response(w).arrayBuffer());let bin="";for(let i=0;i<buf.length;i+=8192)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+8192));return btoa(bin);}
+async function gunz(b64){const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const ds=new DecompressionStream("gzip");const st=new Blob([u]).stream().pipeThrough(ds);return await new Response(st).text();}
+async function backupCopy(){
+  const json=JSON.stringify(backupPayload());let data;
+  try{data=typeof CompressionStream==="function"?"BESZELJ-MENTES2:"+(await gz(json)):"BESZELJ-MENTES:"+btoa(unescape(encodeURIComponent(json)));}
+  catch(e){data="BESZELJ-MENTES:"+btoa(unescape(encodeURIComponent(json)));}
   const out=document.getElementById("bkout");
-  const done=()=>toast("📋 Mentés kimásolva! Illeszd be egy jegyzetbe.",3500);
+  const done=()=>toast(`📋 Mentés kimásolva (${data.length} karakter). Illeszd be egy jegyzetbe vagy e-mailbe.`,4000);
   const manual=()=>{if(out){out.hidden=false;out.value=data;out.focus();out.select();try{document.execCommand("copy")?done():toast("Jelöld ki és másold ki a szöveget.",3500);}catch(e){toast("Jelöld ki és másold ki a szöveget.",3500);}}};
   try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(data).then(()=>{done();if(out){out.hidden=false;out.value=data;}},manual);else manual();}catch(e){manual();}
 }
@@ -1885,12 +1889,32 @@ function backupOpen(){
   inp.click();
 }
 function backupRestore(){backupRestoreText((document.getElementById("bkin")||{}).value||"",false);}
-function backupRestoreText(t,fromFile){
+function b64clean(x){let c=x.replace(/[^A-Za-z0-9+/=_-]/g,"").replace(/-/g,"+").replace(/_/g,"/").replace(/=+$/,"");while(c.length%4)c+="=";return c;}
+async function parseBackup(t){
+  const tt=String(t||"");
+  const j=tt.indexOf("{");
+  if(tt.indexOf("BESZELJ-MENTES")<0&&j>=0){return JSON.parse(tt.slice(j,tt.lastIndexOf("}")+1));}
+  const i2=tt.indexOf("BESZELJ-MENTES2:"),i1=tt.indexOf("BESZELJ-MENTES:");
+  const comp=i2>=0;
+  const body=comp?tt.slice(i2+16):(i1>=0?tt.slice(i1+15):tt);
+  if(comp&&typeof DecompressionStream!=="function")throw {code:"nodecomp"};
+  const toks=body.split(/\s+/).filter(Boolean);
+  let first=toks.findIndex(x=>/[^A-Za-z0-9+/=_-]/.test(x));if(first<0)first=toks.length;
+  const base=toks.slice(0,first);
+  let lastErr="bad";
+  for(let k=0;k<=Math.min(6,base.length-1);k++){
+    const cand=b64clean(base.slice(0,base.length-k).join(""));if(!cand)break;
+    try{
+      const txt=comp?await gunz(cand):decodeURIComponent(escape(atob(cand)));
+      try{return JSON.parse(txt);}catch(e){lastErr=txt.trim().startsWith("{")?"trunc":"bad";}
+    }catch(e){lastErr=cand.length>200?"trunc":"bad";}
+  }
+  throw {code:lastErr};
+}
+async function backupRestoreText(t,fromFile){
   let o;
-  try{const tt=t.trim();
-    if(tt.startsWith("{"))o=JSON.parse(tt);
-    else{const m=tt.replace(/^BESZELJ-MENTES:/,"");o=JSON.parse(decodeURIComponent(escape(atob(m))));}
-  }catch(e){toast("Ez nem érvényes Beszélj! mentés.",3000);return;}
+  try{o=await parseBackup(t);}
+  catch(e){const c=e&&e.code;toast(c==="trunc"?"A mentés hiányos: valószínűleg levágódott másoláskor ("+String(t).length+" karakter jött át). Másold ki újra, és küldd el magadnak e-mailben.":c==="nodecomp"?"Ez a tömörített mentés ezen az eszközön nem olvasható. Frissítsd az appot, vagy használd a fájlos mentést.":"Ez nem érvényes Beszélj! mentés.",6000);return;}
   applyRestore(o,fromFile?"ask":"text");
 }
 function applyRestore(o,mode){
@@ -2137,6 +2161,7 @@ if(NATIVE&&AndroidBridge.ready){try{AndroidBridge.ready();}catch(e){}}
 ruSet("beszelj-remote-ok",APP_VERSION);
 /* what's new */
 const CHANGELOG={
+ "2.26":["A szöveges mentés mostantól tömörített, így sokkal rövidebb, és befér a jegyzetekbe és üzenetekbe is","A visszaállítás elnézőbb (szóközök, sortörések, körülötte lévő szöveg), és szól, ha a mentés másoláskor levágódott"],
  "2.25":["💾 A biztonsági mentés mostantól fájlba kerül (Beállítások → 📤 Mentés fájlba), és fájlból tölthető vissza"],
  "2.24":["Új androidos app (APK): zászlós ikon, választható felolvasó hang, és gyárilag beállított automatikus frissítés"],
  "2.23":["Javítva: a 🚀 Betöltés most gomb néha nem csinált semmit, most mindig betölti a letöltött frissítést"],
