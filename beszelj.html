@@ -247,7 +247,7 @@ textarea{min-height:96px;resize:vertical}
 <div id="app"></div>
 <script>
 var __BOOT=(function(){
-  var OWN="2.24";
+  var OWN="2.25";
   window.__APP_VERSION=OWN;
   function cmp(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1;}return 0;}
   function verOf(h){var m=/var OWN="([0-9.]+)"/.exec(h||"");return m?m[1]:null;}
@@ -1844,8 +1844,11 @@ function vSettings(){
   <div class="panel"><h3>Szint</h3><p>Jelenleg: <b>${LEVELS[S.level??0]} – ${LEVEL_HU[S.level??0]}</b></p>
    <div class="chips" style="margin-top:10px">${LEVELS.map((l,i)=>`<button class="chip" data-act="setlevel" data-v="${i}" aria-pressed="${S.level===i}">${l}</button>`).join("")}</div>
    <button class="btn ghost" data-act="retest" style="margin-top:14px">Szintfelmérő újra</button></div>
-  <div class="panel"><h3>💾 Biztonsági mentés</h3><p class="muted" style="font-size:.92rem">Ha valaha újra kell telepítened az appot, ezzel átmentheted a haladásodat (minden nyelv: szavak, nyelvtan, beszélgetőtársak emlékei, sorozat). Másold ki, és tedd el például egy jegyzetbe vagy e-mailbe.</p>
-   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn" data-act="bk-copy">📋 Mentés másolása</button><button class="btn ghost" data-act="bk-show">📥 Visszaállítás</button></div>
+  <div class="panel"><h3>💾 Biztonsági mentés</h3><p class="muted" style="font-size:.92rem">Ha valaha újra kell telepítened az appot, ezzel átmentheted a haladásodat (minden nyelv: szavak, nyelvtan, beszélgetőtársak emlékei, sorozat, ChatGPT-kulcs). A mentés egy fájl, amit eltehetsz a telefonra, a Drive-ra vagy átküldhetsz magadnak.</p>
+   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn sun" data-act="bk-file">📤 Mentés fájlba</button><button class="btn" data-act="bk-open">📥 Visszaállítás fájlból</button></div>
+   <input type="file" id="bkfile" accept=".json,application/json,text/plain,*/*" hidden>
+   <details style="margin-top:12px"><summary class="muted" style="font-size:.88rem;cursor:pointer">Régebbi telefonhoz: mentés szövegként</summary>
+   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn ghost" data-act="bk-copy">📋 Mentés másolása</button><button class="btn ghost" data-act="bk-show">📥 Visszaállítás szövegből</button></div></details>
    <textarea id="bkout" hidden readonly style="margin-top:10px;min-height:90px;font-size:.8rem"></textarea>
    <textarea id="bkin" hidden placeholder="Illeszd be ide a korábban kimásolt mentést…" style="margin-top:10px;min-height:90px;font-size:.8rem"></textarea>
    <button class="btn sun" id="bkdo" data-act="bk-restore" hidden style="margin-top:8px">Visszaállítás most</button></div>
@@ -1859,18 +1862,53 @@ function backupCopy(){
   const manual=()=>{if(out){out.hidden=false;out.value=data;out.focus();out.select();try{document.execCommand("copy")?done():toast("Jelöld ki és másold ki a szöveget.",3500);}catch(e){toast("Jelöld ki és másold ki a szöveget.",3500);}}};
   try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(data).then(()=>{done();if(out){out.hidden=false;out.value=data;}},manual);else manual();}catch(e){manual();}
 }
-function backupRestore(){
-  const t=(document.getElementById("bkin")||{}).value||"";
+function backupPayload(){save();return {app:"beszelj",type:"backup",v:2,created:new Date().toISOString(),lang:LANG,profiles:allProfiles(),key:API_KEY};}
+function backupFile(){
+  const name="beszelj-mentes-"+todayStr()+".json",content=JSON.stringify(backupPayload());
+  if(NATIVE){
+    if(AndroidBridge.exportFile){try{AndroidBridge.exportFile(name,content);}catch(e){toast("A mentés nem sikerült.");}}
+    else toast("Ehhez az app régebbi változata kell frissíteni (új APK). Addig használd lent a szöveges mentést.",5000);
+    return;
+  }
   try{
-    const m=t.trim().replace(/^BESZELJ-MENTES:/,"");const o=JSON.parse(decodeURIComponent(escape(atob(m))));
-    const profs=o&&o.v===2&&o.profiles?o.profiles:(o&&o.state?{en:o.state}:null);
-    if(!profs||!Object.values(profs).every(p=>p&&Array.isArray(p.words)))throw 0;
-    if(!tapTwice("bkr","Koppints újra: a mentésben lévő nyelvek haladása felülíródik."))return;
-    Object.keys(profs).forEach(c=>{if(LANGS[c]){try{localStorage.setItem(keyFor(LS,c),JSON.stringify(profs[c]));}catch(e){}}});
-    if(o.key){API_KEY=o.key;try{localStorage.setItem(KEYLS,API_KEY);}catch(e){}}
-    const r=readProfile(LANG);S=r?Object.assign(defaultState(),r):defaultState();migrateS();save();
-    toast(`✅ Visszaállítva! (${Object.keys(profs).map(c=>LANGS[c]?LANGS[c].flag:"").join(" ")})`);go(S.level!==null?"home":"welcome");
-  }catch(e){toast("Ez nem érvényes mentés.",3000);}
+    const blob=new Blob([content],{type:"application/json"});
+    const file=typeof File==="function"?new File([blob],name,{type:"application/json"}):null;
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Beszélj! mentés"}).then(()=>toast("💾 Mentés elküldve / elmentve")).catch(()=>{});return;}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);toast("💾 Mentés letöltve: "+name,3500);
+  }catch(e){toast("A mentés nem sikerült. Próbáld a szöveges mentést.",4000);}
+}
+window.__exportResult=function(ok,msg){toast(msg,3500);};
+function backupOpen(){
+  const inp=document.getElementById("bkfile");if(!inp)return;
+  inp.value="";inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>backupRestoreText(String(r.result||""),true);r.onerror=()=>toast("A fájl nem olvasható.");r.readAsText(f);};
+  inp.click();
+}
+function backupRestore(){backupRestoreText((document.getElementById("bkin")||{}).value||"",false);}
+function backupRestoreText(t,fromFile){
+  let o;
+  try{const tt=t.trim();
+    if(tt.startsWith("{"))o=JSON.parse(tt);
+    else{const m=tt.replace(/^BESZELJ-MENTES:/,"");o=JSON.parse(decodeURIComponent(escape(atob(m))));}
+  }catch(e){toast("Ez nem érvényes Beszélj! mentés.",3000);return;}
+  applyRestore(o,fromFile?"ask":"text");
+}
+function applyRestore(o,mode){
+  const profs=o&&o.v===2&&o.profiles?o.profiles:(o&&o.state?{en:o.state}:null);
+  if(!profs||!Object.keys(profs).length||!Object.values(profs).every(p=>p&&Array.isArray(p.words))){toast("Ez nem érvényes Beszélj! mentés.",3000);return;}
+  if(mode==="ask"){
+    const box=document.createElement("div");box.className="whatsnew";
+    box.innerHTML=`<div class="wncard"><h3>📥 Visszaállítás</h3><p>A mentésben ezek a nyelvek vannak: ${Object.keys(profs).map(c=>LANGS[c]?LANGS[c].flag+" "+LANGS[c].name+" ("+(profs[c].words||[]).length+" szó)":"").filter(Boolean).join(", ")}.</p>${o.created?`<p class="muted">Készült: ${esc(new Date(o.created).toLocaleString("hu-HU"))}</p>`:""}<p class="muted">Ezek jelenlegi haladása felülíródik a mentéssel.</p><div style="display:grid;gap:10px;margin-top:14px"><button class="btn big sun" id="rsok">Visszaállítás</button><button class="btn big ghost" id="rsno">Mégse</button></div></div>`;
+    document.body.appendChild(box);
+    document.getElementById("rsno").onclick=()=>box.remove();
+    document.getElementById("rsok").onclick=()=>{box.remove();applyRestore(o,"confirmed");};
+    return;
+  }
+  if(mode==="text"&&!tapTwice("bkr","Koppints újra: a mentésben lévő nyelvek haladása felülíródik."))return;
+  Object.keys(profs).forEach(c=>{if(LANGS[c]){try{localStorage.setItem(keyFor(LS,c),JSON.stringify(profs[c]));}catch(e){}}});
+  if(o.key){API_KEY=o.key;try{localStorage.setItem(KEYLS,API_KEY);}catch(e){}}
+  const r=readProfile(LANG);S=r?Object.assign(defaultState(),r):defaultState();migrateS();save();
+  toast(`✅ Visszaállítva! (${Object.keys(profs).map(c=>LANGS[c]?LANGS[c].flag:"").join(" ")})`);go(S.level!==null?"home":"welcome");
 }
 /* ---------- multi-language helpers ---------- */
 async function genBank(spec){
@@ -2029,6 +2067,8 @@ document.addEventListener("click",e=>{
     case "ru-save":{const v=ruNormalize(document.getElementById("ruurl").value);ruSet(RU_URL,v);if(v)ruSet(RU_LAST,"");vSettings();toast(v?"Cím elmentve ✅":"Cím törölve");if(v)ruCheck(true);break;}
     case "ru-check":ruCheck(true);break;
     case "ru-restart":ruRestart();break;
+    case "bk-file":backupFile();break;
+    case "bk-open":backupOpen();break;
     case "bk-copy":backupCopy();break;
     case "bk-show":{const t=document.getElementById("bkin");if(t){t.hidden=false;t.focus();}const bb=document.getElementById("bkdo");if(bb)bb.hidden=false;break;}
     case "bk-restore":backupRestore();break;
@@ -2097,6 +2137,7 @@ if(NATIVE&&AndroidBridge.ready){try{AndroidBridge.ready();}catch(e){}}
 ruSet("beszelj-remote-ok",APP_VERSION);
 /* what's new */
 const CHANGELOG={
+ "2.25":["💾 A biztonsági mentés mostantól fájlba kerül (Beállítások → 📤 Mentés fájlba), és fájlból tölthető vissza"],
  "2.24":["Új androidos app (APK): zászlós ikon, választható felolvasó hang, és gyárilag beállított automatikus frissítés"],
  "2.23":["Javítva: a 🚀 Betöltés most gomb néha nem csinált semmit, most mindig betölti a letöltött frissítést"],
  "2.22":["A frissítések mostantól az új „Apps” nevű GitHub-tárolóból érkeznek, ezt az app magától átállította"],
